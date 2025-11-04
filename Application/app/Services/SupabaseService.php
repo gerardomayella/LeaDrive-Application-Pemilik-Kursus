@@ -40,6 +40,11 @@ class SupabaseService
      */
     public function uploadFile(UploadedFile $file, string $bucket, string $folder, ?string $fileName = null): ?string
     {
+        // Validasi file sebelum upload
+        if (!$this->validateFile($file)) {
+            return null;
+        }
+        
         try {
             // Generate unique filename jika tidak disediakan
             if (!$fileName) {
@@ -94,6 +99,38 @@ class SupabaseService
             ]);
             return null;
         }
+    }
+
+    /**
+     * Validasi file berdasarkan konfigurasi
+     *
+     * @param UploadedFile $file
+     * @return bool
+     */
+    private function validateFile(UploadedFile $file): bool
+    {
+        $maxSize = config('supabase.upload.max_file_size');
+        $allowedMimes = config('supabase.upload.allowed_mime_types');
+
+        // Validasi ukuran file
+        if ($file->getSize() > $maxSize) {
+            Log::error('File size exceeds the maximum allowed size', [
+                'file_size' => $file->getSize(),
+                'max_size' => $maxSize,
+            ]);
+            return false;
+        }
+
+        // Validasi tipe MIME
+        if (!in_array($file->getMimeType(), $allowedMimes)) {
+            Log::error('File MIME type is not allowed', [
+                'mime_type' => $file->getMimeType(),
+                'allowed_mimes' => $allowedMimes,
+            ]);
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -160,7 +197,12 @@ class SupabaseService
     public function uploadKursusDocument(UploadedFile $file, string $documentType): ?string
     {
         $bucket = config('supabase.buckets.kursus');
-        $folder = config("supabase.folders.kursus.{$documentType}", $documentType);
+        $folder = config("supabase.folders.kursus.{$documentType}");
+
+        if (!$folder) {
+            Log::error('Invalid document type for kursus', ['document_type' => $documentType]);
+            return null;
+        }
         
         return $this->uploadFile($file, $bucket, $folder);
     }
@@ -175,7 +217,12 @@ class SupabaseService
     public function uploadInstrukturDocument(UploadedFile $file, string $documentType): ?string
     {
         $bucket = config('supabase.buckets.instruktur');
-        $folder = config("supabase.folders.instruktur.{$documentType}", $documentType);
+        $folder = config("supabase.folders.instruktur.{$documentType}");
+
+        if (!$folder) {
+            Log::error('Invalid document type for instruktur', ['document_type' => $documentType]);
+            return null;
+        }
         
         return $this->uploadFile($file, $bucket, $folder);
     }

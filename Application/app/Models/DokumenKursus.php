@@ -17,7 +17,7 @@ class DokumenKursus extends Model
 
     protected $fillable = [
         'ktp',
-        'izin_usaha',
+        'Izin_usaha',
         'sertif_instruktur',
         'dokumen_legal',
         'id_request',

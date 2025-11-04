@@ -364,37 +364,6 @@
                     @enderror
                 </div>
 
-                <div class="form-group">
-                    <label>Pin Lokasi GPS <span class="required">*</span></label>
-                    <div id="gpsSection" class="gps-section" onclick="openMapPicker()">
-                        <div class="gps-icon">📍</div>
-                        <div id="gpsText">Klik untuk memilih lokasi</div>
-                        <div id="gpsSelected" class="gps-selected" style="display: none;"></div>
-                    </div>
-                    <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude') }}" required>
-                    <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude') }}" required>
-                    @error('latitude')
-                        <div class="error-message">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label>Jenis Kendaraan yang Diajarkan <span class="required">*</span></label>
-                    <div class="vehicle-types">
-                        <div class="vehicle-item">
-                            <input type="checkbox" id="mobil_manual" name="jenis_kendaraan[]" value="mobil_manual" {{ in_array('mobil_manual', old('jenis_kendaraan', [])) ? 'checked' : '' }}>
-                            <label for="mobil_manual">🚗 Mobil Manual</label>
-                        </div>
-                        <div class="vehicle-item">
-                            <input type="checkbox" id="mobil_matic" name="jenis_kendaraan[]" value="mobil_matic" {{ in_array('mobil_matic', old('jenis_kendaraan', [])) ? 'checked' : '' }}>
-                            <label for="mobil_matic">🚗 Mobil Matic</label>
-                        </div>
-                    </div>
-                    @error('jenis_kendaraan')
-                        <div class="error-message">{{ $message }}</div>
-                    @enderror
-                </div>
-
                 <div class="time-row">
                     <div class="form-group">
                         <label for="jam_buka">Jam Buka <span class="required">*</span></label>
@@ -413,16 +382,6 @@
                     </div>
                 </div>
 
-                <div class="paket-section">
-                    <label>Paket Kursus yang Tersedia <span class="required">*</span></label>
-                    <div id="paketContainer">
-                        <!-- Paket akan ditambahkan secara dinamis -->
-                    </div>
-                    <button type="button" class="btn-add-paket" onclick="addPaket()">
-                        <span>+</span> Tambah Paket Lain
-                    </button>
-                </div>
-
                 <div class="form-actions">
                     <a href="{{ route('register.back', 2) }}" class="btn-back">Kembali</a>
                     <button type="submit" class="btn-next">Lanjutkan ke Dokumen</button>
@@ -431,89 +390,6 @@
         </div>
     </div>
 
-    <script>
-        let paketCount = 0;
-
-        function addPaket() {
-            paketCount++;
-            const container = document.getElementById('paketContainer');
-            const paketDiv = document.createElement('div');
-            paketDiv.className = 'paket-item';
-            paketDiv.id = `paket-${paketCount}`;
-            
-            paketDiv.innerHTML = `
-                <div class="paket-item-header">
-                    <h4>Paket ${paketCount}</h4>
-                    ${paketCount > 1 ? '<button type="button" class="paket-item-remove" onclick="removePaket(' + paketCount + ')">Hapus</button>' : ''}
-                </div>
-                <div class="paket-form-row">
-                    <input type="text" name="paket[${paketCount}][nama_paket]" placeholder="Nama paket" required>
-                    <input type="number" name="paket[${paketCount}][harga]" placeholder="Harga (Rp)" min="0" required>
-                    <input type="number" name="paket[${paketCount}][durasi_jam]" placeholder="Durasi (jam)" min="1" required>
-                </div>
-                <textarea name="paket[${paketCount}][deskripsi]" placeholder="Deskripsi paket..." rows="3"></textarea>
-            `;
-            
-            container.appendChild(paketDiv);
-        }
-
-        function removePaket(id) {
-            const paketDiv = document.getElementById(`paket-${id}`);
-            paketDiv.remove();
-        }
-
-        function openMapPicker() {
-            // Simple prompt untuk koordinat GPS (bisa diganti dengan Google Maps API)
-            const lat = prompt('Masukkan Latitude:', '-6.202825');
-            const lng = prompt('Masukkan Longitude:', '106.890963');
-            
-            if (lat && lng) {
-                document.getElementById('latitude').value = lat;
-                document.getElementById('longitude').value = lng;
-                document.getElementById('gpsSelected').textContent = `Lokasi Terpilih: ${lat}, ${lng}`;
-                document.getElementById('gpsSelected').style.display = 'block';
-                document.getElementById('gpsText').style.display = 'none';
-            }
-        }
-
-        // Load old values jika ada
-        @if(old('paket') && count(old('paket')) > 0)
-            document.getElementById('paketContainer').innerHTML = '';
-            @foreach(old('paket') as $index => $paket)
-                paketCount++;
-                const container{{ $index }} = document.getElementById('paketContainer');
-                const paketDiv{{ $index }} = document.createElement('div');
-                paketDiv{{ $index }}.className = 'paket-item';
-                paketDiv{{ $index }}.id = `paket-${paketCount}`;
-                
-                paketDiv{{ $index }}.innerHTML = `
-                    <div class="paket-item-header">
-                        <h4>Paket ${paketCount}</h4>
-                        ${paketCount > 1 ? '<button type="button" class="paket-item-remove" onclick="removePaket(' + paketCount + ')">Hapus</button>' : ''}
-                    </div>
-                    <div class="paket-form-row">
-                        <input type="text" name="paket[${paketCount}][nama_paket]" placeholder="Nama paket" value="{{ isset($paket['nama_paket']) ? htmlspecialchars($paket['nama_paket'], ENT_QUOTES) : '' }}" required>
-                        <input type="number" name="paket[${paketCount}][harga]" placeholder="Harga (Rp)" value="{{ isset($paket['harga']) ? $paket['harga'] : '' }}" min="0" required>
-                        <input type="number" name="paket[${paketCount}][durasi_jam]" placeholder="Durasi (jam)" value="{{ isset($paket['durasi_jam']) ? $paket['durasi_jam'] : '' }}" min="1" required>
-                    </div>
-                    <textarea name="paket[${paketCount}][deskripsi]" placeholder="Deskripsi paket..." rows="3">{{ isset($paket['deskripsi']) ? htmlspecialchars($paket['deskripsi'], ENT_QUOTES) : '' }}</textarea>
-                `;
-                
-                container{{ $index }}.appendChild(paketDiv{{ $index }});
-            @endforeach
-        @else
-            // Initialize dengan satu paket jika tidak ada old values
-            window.onload = function() {
-                addPaket();
-            };
-        @endif
-
-        @if(old('latitude') && old('longitude'))
-            document.getElementById('gpsSelected').textContent = `Lokasi Terpilih: {{ old('latitude') }}, {{ old('longitude') }}`;
-            document.getElementById('gpsSelected').style.display = 'block';
-            document.getElementById('gpsText').style.display = 'none';
-        @endif
-    </script>
 </body>
 </html>
 

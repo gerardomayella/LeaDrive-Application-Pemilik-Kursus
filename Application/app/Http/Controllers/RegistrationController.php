@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Request as RequestModel;
 use App\Models\DokumenKursus;
-use App\Models\PaketKursus;
 use App\Services\SupabaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -29,8 +27,15 @@ class RegistrationController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'nomor_hp' => 'required|string|max:20|unique:users,nomor_hp',
+            'email' => [
+                'required','string','email','max:255',
+                Rule::unique('kursus','email'),
+                Rule::unique('request_akun','email'),
+            ],
+            'nomor_hp' => [
+                'required', 'regex:/^[0-9]{8,20}$/',
+                Rule::unique('request_akun','nomor_hp'),
+            ],
             'password' => [
                 'required',
                 'string',
@@ -78,20 +83,9 @@ class RegistrationController extends Controller
         $validated = $request->validate([
             'nama_kursus' => 'required|string|max:255',
             'lokasi' => 'required|string',
-            'latitude' => 'required|string',
-            'longitude' => 'required|string',
             'jam_buka' => 'required|date_format:H:i',
             'jam_tutup' => 'required|date_format:H:i|after:jam_buka',
-            'jenis_kendaraan' => 'required|array|min:1',
-            'jenis_kendaraan.*' => Rule::in(['mobil_manual', 'mobil_matic']),
-            'paket' => 'required|array|min:1',
-            'paket.*.nama_paket' => 'required|string|max:255',
-            'paket.*.harga' => 'required|numeric|min:0',
-            'paket.*.durasi_jam' => 'required|integer|min:1',
-            'paket.*.deskripsi' => 'nullable|string',
         ], [
-            'jenis_kendaraan.required' => 'Pilih minimal satu jenis kendaraan.',
-            'paket.required' => 'Tambahkan minimal satu paket kursus.',
             'jam_tutup.after' => 'Jam tutup harus setelah jam buka.',
         ]);
 
@@ -145,15 +139,6 @@ class RegistrationController extends Controller
             $step1 = $request->session()->get('registration.step1');
             $step2 = $request->session()->get('registration.step2');
 
-            // Create user
-            $user = User::create([
-                'name' => $step1['name'],
-                'email' => $step1['email'],
-                'nomor_hp' => $step1['nomor_hp'],
-                'password' => Hash::make($step1['password']),
-                'role' => 'pemilik_kursus',
-                'status' => 'pending',
-            ]);
 
             // Initialize Supabase Service
             $supabaseService = new SupabaseService();
@@ -213,38 +198,28 @@ class RegistrationController extends Controller
                 ])->withInput();
             }
 
-            // Create request
+            // Create request_akun sesuai schema
             $requestModel = RequestModel::create([
                 'waktu' => now(),
                 'nama_kursus' => $step2['nama_kursus'],
                 'lokasi' => $step2['lokasi'],
-                'latitude' => $step2['latitude'],
-                'longitude' => $step2['longitude'],
                 'jam_buka' => $step2['jam_buka'],
                 'jam_tutup' => $step2['jam_tutup'],
-                'jenis_kendaraan' => $step2['jenis_kendaraan'],
-                'id_user' => $user->id,
+                'password' => Hash::make($step1['password']),
+                'nomor_hp' => $step1['nomor_hp'],
+                'email' => $step1['email'],
             ]);
 
-            // Create dokumen kursus dengan URL dari Supabase
+            
             DokumenKursus::create([
                 'ktp' => $ktpUrl,
-                'izin_usaha' => $izinUsahaUrl,
+                'Izin_usaha' => $izinUsahaUrl,
                 'sertif_instruktur' => $sertifUrl,
                 'dokumen_legal' => $dokumenLegalUrl,
                 'id_request' => $requestModel->id_request,
             ]);
 
-            // Create paket kursus
-            foreach ($step2['paket'] as $paket) {
-                PaketKursus::create([
-                    'nama_paket' => $paket['nama_paket'],
-                    'harga' => $paket['harga'],
-                    'durasi_jam' => $paket['durasi_jam'],
-                    'deskripsi' => $paket['deskripsi'] ?? null,
-                    'id_request' => $requestModel->id_request,
-                ]);
-            }
+            
 
             DB::commit();
 

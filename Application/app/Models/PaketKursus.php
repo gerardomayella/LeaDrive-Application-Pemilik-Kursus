@@ -9,26 +9,19 @@ class PaketKursus extends Model
 {
     use HasFactory;
 
-    protected $table = 'paket_kursus';
+    protected $table = 'paketKursus';
     protected $primaryKey = 'id_paket';
 
     protected $keyType = 'int';
     public $incrementing = true;
 
     protected $fillable = [
-        'nama_paket',
-        'harga',
-        'durasi_jam',
+        'jenis_mobil',
+        'durasi',
+        'id_kursus',
         'deskripsi',
-        'id_request',
     ];
 
-    /**
-     * Relasi ke tabel Request
-     */
-    public function request()
-    {
-        return $this->belongsTo(Request::class, 'id_request', 'id_request');
-    }
+    
 }
 

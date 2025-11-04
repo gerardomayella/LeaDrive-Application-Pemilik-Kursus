@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Kursus;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -28,47 +27,48 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $credentials = $this->getCredentials($request->email_or_phone, $request->password);
+        $identifier = $request->input('email_or_phone');
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
-            $user = Auth::user();
-
-            // Check if user is pending
-            if ($user->status === 'pending') {
-                Auth::logout();
-                return back()->withErrors([
-                    'email_or_phone' => 'Akun Anda masih menunggu persetujuan admin.',
-                ]);
-            }
-
-            if ($user->status === 'rejected') {
-                Auth::logout();
-                return back()->withErrors([
-                    'email_or_phone' => 'Akun Anda telah ditolak. Silakan hubungi admin.',
-                ]);
-            }
-
-            return redirect()->intended('/dashboard');
+        // Login hanya menggunakan email pada tabel kursus
+        if (!filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+            throw ValidationException::withMessages([
+                'email_or_phone' => ['Gunakan email terdaftar untuk masuk.'],
+            ]);
         }
 
-        throw ValidationException::withMessages([
-            'email_or_phone' => ['Email/nomor HP atau password salah.'],
-        ]);
-    }
+        $kursus = Kursus::where('email', $identifier)->first();
 
-    /**
-     * Get credentials for authentication
-     */
-    private function getCredentials($emailOrPhone, $password)
-    {
-        $field = filter_var($emailOrPhone, FILTER_VALIDATE_EMAIL) ? 'email' : 'nomor_hp';
-        
-        return [
-            $field => $emailOrPhone,
-            'password' => $password,
-        ];
+        if (!$kursus) {
+            throw ValidationException::withMessages([
+                'email_or_phone' => ['Email atau password salah.'],
+            ]);
+        }
+
+        $password = (string) $request->input('password');
+
+        $passwordMatches = false;
+        if (!empty($kursus->password)) {
+            // Coba verifikasi hash terlebih dahulu
+            $passwordMatches = Hash::check($password, $kursus->password) || $kursus->password === $password;
+        }
+
+        if (!$passwordMatches) {
+            throw ValidationException::withMessages([
+                'email_or_phone' => ['Email atau password salah.'],
+            ]);
+        }
+
+        if (!(bool) $kursus->status) {
+            return back()->withErrors([
+                'email_or_phone' => 'Akun kursus Anda belum disetujui admin.',
+            ]);
+        }
+
+        // Simpan session sederhana untuk menandai login kursus
+        $request->session()->put('kursus_id', $kursus->id_kursus);
+        $request->session()->regenerate();
+
+        return redirect()->intended('/dashboard');
     }
 
     /**
@@ -76,11 +76,9 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        Auth::logout();
-
+        $request->session()->forget('kursus_id');
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
         return redirect('/');
     }
 }
