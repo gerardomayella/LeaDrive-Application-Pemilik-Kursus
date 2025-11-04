@@ -22,9 +22,39 @@ class Request extends Model
         'lokasi',
         'jam_buka',
         'jam_tutup',
+        'id_user',
+        'jenis_kendaraan',
+        'latitude',
+        'longitude',
     ];
 
     public $timestamps = false;
 
-    
+    protected $casts = [
+        'jenis_kendaraan' => 'array',
+    ];
+
+    /**
+     * Relasi ke tabel User
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user', 'id');
+    }
+
+    /**
+     * Relasi ke tabel DokumenKursus
+     */
+    public function dokumenKursus()
+    {
+        return $this->hasOne(DokumenKursus::class, 'id_request', 'id_request');
+    }
+
+    /**
+     * Relasi ke tabel PaketKursus
+     */
+    public function paketKursus()
+    {
+        return $this->hasMany(PaketKursus::class, 'id_request', 'id_request');
+    }
 }

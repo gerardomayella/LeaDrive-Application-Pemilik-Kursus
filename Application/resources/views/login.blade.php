@@ -70,12 +70,28 @@
 </head>
 <body>
     <div class="login-container">
-        <img src="{{ asset('images/placeholder-car-logo.png') }}" alt="Car Logo Placeholder">
+        <img src="{{ asset('images/logo.jpg') }}">
         <h1>Masuk ke LeadDrive</h1>
         <p>Kelola kursus mengemudi Anda dengan mudah</p>
-        <form action="{{ route('login') }}" method="POST">
+        @if(session('success'))
+            <div style="background-color: #4caf50; color: #fff; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div style="background-color: #ff4444; color: #fff; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('login.post') }}" method="POST">
             @csrf
-            <input type="text" name="email_or_phone" placeholder="Masukkan email atau nomor HP" required>
+            <input type="text" name="email_or_phone" placeholder="Masukkan email atau nomor HP" value="{{ old('email_or_phone') }}" required>
             <input type="password" name="password" placeholder="Masukkan password" required>
             <div style="text-align: left; margin-bottom: 1rem;">
                 <input type="checkbox" name="remember" id="remember">
@@ -84,7 +100,7 @@
             </div>
             <button type="submit">Masuk</button>
         </form>
-        <p>Belum punya akun? <a href="#">Daftar sekarang</a></p>
+        <p>Belum punya akun? <a href="{{ route('register.step1') }}">Daftar sekarang</a></p>
     </div>
 </body>
 </html>

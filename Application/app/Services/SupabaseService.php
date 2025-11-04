@@ -1,0 +1,183 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\UploadedFile;
+
+class SupabaseService
+{
+    protected $url;
+    protected $key;
+    protected $storageUrl;
+
+    public function __construct()
+    {
+        // Ambil dari config (sudah ada auto-detect logic di config/supabase.php)
+        $this->url = config('supabase.url');
+        $this->key = config('supabase.key');
+        $this->storageUrl = config('supabase.storage_url');
+        
+        // Validasi konfigurasi
+        if (!$this->key) {
+            \Log::warning('SUPABASE_KEY tidak ditemukan di .env. Upload ke Supabase Storage akan gagal.');
+        }
+        
+        if (!$this->url || !$this->storageUrl) {
+            \Log::warning('SUPABASE_URL tidak ditemukan. Coba set SUPABASE_URL atau pastikan DB_HOST berformat Supabase.');
+        }
+    }
+
+    /**
+     * Upload file ke Supabase Storage bucket
+     *
+     * @param UploadedFile $file
+     * @param string $bucket Nama bucket (kursus atau instruktur)
+     * @param string $folder Nama folder dalam bucket
+     * @param string|null $fileName Nama file custom (optional)
+     * @return string|null Public URL file atau null jika gagal
+     */
+    public function uploadFile(UploadedFile $file, string $bucket, string $folder, ?string $fileName = null): ?string
+    {
+        try {
+            // Generate unique filename jika tidak disediakan
+            if (!$fileName) {
+                $extension = $file->getClientOriginalExtension();
+                $fileName = uniqid() . '_' . time() . '.' . $extension;
+            }
+
+            // Path file di bucket (pastikan tidak ada leading/trailing slash)
+            $filePath = trim($folder . '/' . $fileName, '/');
+
+            // Baca file content
+            $fileContent = file_get_contents($file->getRealPath());
+            $mimeType = $file->getMimeType();
+
+            // Supabase Storage API endpoint
+            $uploadUrl = rtrim($this->storageUrl, '/') . '/object/' . $bucket . '/' . $filePath;
+
+            // Upload ke Supabase Storage menggunakan PUT method
+            $response = Http::withHeaders([
+                'apikey' => $this->key,
+                'Authorization' => 'Bearer ' . $this->key,
+                'Content-Type' => $mimeType,
+                'x-upsert' => 'true', // Overwrite jika file sudah ada
+            ])->withBody($fileContent, $mimeType)
+              ->put($uploadUrl);
+
+            if ($response->successful()) {
+                // Generate public URL
+                $publicUrl = $this->getPublicUrl($bucket, $filePath);
+                Log::info('File uploaded successfully to Supabase', [
+                    'bucket' => $bucket,
+                    'path' => $filePath,
+                    'url' => $publicUrl,
+                ]);
+                return $publicUrl;
+            } else {
+                Log::error('Failed to upload file to Supabase', [
+                    'bucket' => $bucket,
+                    'path' => $filePath,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                    'headers' => $response->headers(),
+                ]);
+                return null;
+            }
+        } catch (\Exception $e) {
+            Log::error('Exception while uploading file to Supabase', [
+                'bucket' => $bucket,
+                'folder' => $folder,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Get public URL untuk file di Supabase Storage
+     *
+     * @param string $bucket
+     * @param string $filePath
+     * @return string
+     */
+    public function getPublicUrl(string $bucket, string $filePath): string
+    {
+        // Supabase Storage public URL format: {storage_url}/object/public/{bucket}/{path}
+        return rtrim($this->storageUrl, '/') . '/object/public/' . $bucket . '/' . $filePath;
+    }
+
+    /**
+     * Delete file dari Supabase Storage
+     *
+     * @param string $bucket
+     * @param string $filePath
+     * @return bool
+     */
+    public function deleteFile(string $bucket, string $filePath): bool
+    {
+        try {
+            $response = Http::withHeaders([
+                'apikey' => $this->key,
+                'Authorization' => 'Bearer ' . $this->key,
+            ])->delete(
+                $this->storageUrl . '/object/' . $bucket . '/' . $filePath
+            );
+
+            if ($response->successful()) {
+                Log::info('File deleted successfully from Supabase', [
+                    'bucket' => $bucket,
+                    'path' => $filePath,
+                ]);
+                return true;
+            } else {
+                Log::error('Failed to delete file from Supabase', [
+                    'bucket' => $bucket,
+                    'path' => $filePath,
+                    'status' => $response->status(),
+                ]);
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::error('Exception while deleting file from Supabase', [
+                'bucket' => $bucket,
+                'path' => $filePath,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Upload dokumen kursus ke bucket kursus
+     *
+     * @param UploadedFile $file
+     * @param string $documentType (ktp, izin, dokumenlain, fotokursus)
+     * @return string|null
+     */
+    public function uploadKursusDocument(UploadedFile $file, string $documentType): ?string
+    {
+        $bucket = config('supabase.buckets.kursus');
+        $folder = config("supabase.folders.kursus.{$documentType}", $documentType);
+        
+        return $this->uploadFile($file, $bucket, $folder);
+    }
+
+    /**
+     * Upload dokumen instruktur ke bucket instruktur
+     *
+     * @param UploadedFile $file
+     * @param string $documentType (sim, fotoinstruktur, sertifikat)
+     * @return string|null
+     */
+    public function uploadInstrukturDocument(UploadedFile $file, string $documentType): ?string
+    {
+        $bucket = config('supabase.buckets.instruktur');
+        $folder = config("supabase.folders.instruktur.{$documentType}", $documentType);
+        
+        return $this->uploadFile($file, $bucket, $folder);
+    }
+}
+

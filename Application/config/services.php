@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Supabase Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Konfigurasi untuk Supabase Storage API
+    | Menggunakan config/supabase.php untuk detail lengkap
+    |
+    */
+    'supabase' => [
+        'url' => config('supabase.url'),
+        'key' => config('supabase.key'),
+        'storage_url' => config('supabase.storage_url'),
+    ],
+
 ];
