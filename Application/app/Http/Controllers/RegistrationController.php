@@ -118,6 +118,12 @@ class RegistrationController extends Controller
      */
     public function step3(Request $request)
     {
+        // Per-request execution time to 5 minutes
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(300);
+        }
+        @ini_set('max_execution_time', '300');
+
         if (!$request->session()->has('registration.step1') || !$request->session()->has('registration.step2')) {
             return redirect()->route('register.step1.show');
         }
@@ -217,7 +223,7 @@ class RegistrationController extends Controller
                 'status' => 'pending',
             ]);
 
-            // Create request_akun sesuai schema: kolom id_request tidak auto-increment
+            // Create request_akun sesuai schema baru: kolom id_request tidak auto-increment
             $nextRequestId = (DB::table('request_akun')->max('id_request') ?? 0) + 1;
             DB::table('request_akun')->insert([
                 'id_request' => $nextRequestId,
@@ -226,7 +232,10 @@ class RegistrationController extends Controller
                 'lokasi' => $step2['lokasi'],
                 'jam_buka' => $step2['jam_buka'],
                 'jam_tutup' => $step2['jam_tutup'],
-                'id_user' => $user->id,
+                // field baru sesuai skema
+                'password' => Hash::make($step1['password']),
+                'nama_pemilik' => $step1['name'],
+                'email' => $step1['email'],
             ]);
 
             
