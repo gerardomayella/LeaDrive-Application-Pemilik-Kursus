@@ -60,6 +60,8 @@ return [
     'url' => $supabaseUrl,
     // Gunakan ANON key secara default untuk operasi publik (fallback ke SUPABASE_KEY atau SERVICE_ROLE jika diperlukan)
     'key' => env('SUPABASE_ANON_KEY', env('SUPABASE_KEY', env('SUPABASE_SERVICE_ROLE_KEY', ''))),
+    // Service role key khusus untuk operasi server-side (upload/delete) bila diperlukan
+    'service_key' => env('SUPABASE_SERVICE_ROLE_KEY', ''),
     'storage_url' => $storageUrl,
     // Verifikasi SSL untuk HTTP client ke Supabase. Set false di lingkungan lokal bila terjadi cURL error 60
     'ssl_verify' => env('SUPABASE_SSL_VERIFY', true),

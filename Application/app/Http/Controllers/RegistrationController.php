@@ -150,7 +150,9 @@ class RegistrationController extends Controller
             // Upload KTP
             $ktpUrl = $supabaseService->uploadKursusDocument($request->file('ktp'), 'ktp');
             if (!$ktpUrl) {
-                $errors[] = 'Gagal mengupload KTP ke Supabase.';
+                $e = $supabaseService->getLastError();
+                $detail = $e ? (' (detail: ' . (isset($e['status']) ? ('HTTP ' . $e['status'] . ' ') : '') . (isset($e['error']) ? $e['error'] : ($e['body'] ?? '')) . ')') : '';
+                $errors[] = 'Gagal mengupload KTP ke Supabase.' . $detail;
             } else {
                 $uploadedFiles['ktp'] = $ktpUrl;
             }
@@ -158,7 +160,9 @@ class RegistrationController extends Controller
             // Upload Izin Usaha
             $izinUsahaUrl = $supabaseService->uploadKursusDocument($request->file('izin_usaha'), 'izin');
             if (!$izinUsahaUrl) {
-                $errors[] = 'Gagal mengupload Izin Usaha ke Supabase.';
+                $e = $supabaseService->getLastError();
+                $detail = $e ? (' (detail: ' . (isset($e['status']) ? ('HTTP ' . $e['status'] . ' ') : '') . (isset($e['error']) ? $e['error'] : ($e['body'] ?? '')) . ')') : '';
+                $errors[] = 'Gagal mengupload Izin Usaha ke Supabase.' . $detail;
             } else {
                 $uploadedFiles['izin_usaha'] = $izinUsahaUrl;
             }
@@ -204,12 +208,13 @@ class RegistrationController extends Controller
                 'email' => $step1['email'],
                 'password' => Hash::make($step1['password']),
                 'nomor_hp' => $step1['nomor_hp'],
-                'role' => 'pemilik_kursus',
                 'status' => 'pending',
             ]);
 
-            // Create request_akun sesuai schema (link ke users)
-            $requestModel = RequestModel::create([
+            // Create request_akun sesuai schema: kolom id_request tidak auto-increment
+            $nextRequestId = (DB::table('request_akun')->max('id_request') ?? 0) + 1;
+            DB::table('request_akun')->insert([
+                'id_request' => $nextRequestId,
                 'waktu' => now(),
                 'nama_kursus' => $step2['nama_kursus'],
                 'lokasi' => $step2['lokasi'],
@@ -219,12 +224,15 @@ class RegistrationController extends Controller
             ]);
 
             
-            DokumenKursus::create([
+            // Create dokumen_kursus: kolom id juga tidak auto-increment
+            $nextDokumenId = (DB::table('dokumen_kursus')->max('id') ?? 0) + 1;
+            DB::table('dokumen_kursus')->insert([
+                'id' => $nextDokumenId,
                 'ktp' => $ktpUrl,
                 'izin_usaha' => $izinUsahaUrl,
                 'sertif_instruktur' => $sertifUrl,
                 'dokumen_legal' => $dokumenLegalUrl,
-                'id_request' => $requestModel->id_request,
+                'id_request' => $nextRequestId,
             ]);
 
             

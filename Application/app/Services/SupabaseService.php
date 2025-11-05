@@ -10,14 +10,17 @@ class SupabaseService
 {
     protected $url;
     protected $key;
+    protected $serviceKey;
     protected $storageUrl;
     protected $sslVerify;
+    protected $lastError = null; // array|null: simpan error terakhir dari operasi HTTP
 
     public function __construct()
     {
         // Ambil dari config (sudah ada auto-detect logic di config/supabase.php)
         $this->url = config('supabase.url');
         $this->key = config('supabase.key');
+        $this->serviceKey = config('supabase.service_key');
         $this->storageUrl = config('supabase.storage_url');
         $this->sslVerify = (bool) config('supabase.ssl_verify', true);
         
@@ -29,6 +32,15 @@ class SupabaseService
         if (!$this->url || !$this->storageUrl) {
             \Log::warning('SUPABASE_URL tidak ditemukan. Coba set SUPABASE_URL atau pastikan DB_HOST berformat Supabase.');
         }
+    }
+
+    /**
+     * Mengambil info error terakhir dari operasi HTTP Supabase.
+     * @return array|null {status?: int, body?: string, headers?: array, error?: string}
+     */
+    public function getLastError(): ?array
+    {
+        return $this->lastError;
     }
 
     /**
@@ -64,18 +76,22 @@ class SupabaseService
             // Supabase Storage API endpoint
             $uploadUrl = rtrim($this->storageUrl, '/') . '/object/' . $bucket . '/' . $filePath;
 
+            // Tentukan key untuk operasi server-side (service role jika tersedia)
+            $authKey = $this->serviceKey ?: $this->key;
+
             // Upload ke Supabase Storage menggunakan PUT method
             $response = Http::withOptions([
                 'verify' => $this->sslVerify,
             ])->withHeaders([
-                'apikey' => $this->key,
-                'Authorization' => 'Bearer ' . $this->key,
+                'apikey' => $authKey,
+                'Authorization' => 'Bearer ' . $authKey,
                 'Content-Type' => $mimeType,
                 'x-upsert' => 'true', // Overwrite jika file sudah ada
             ])->withBody($fileContent, $mimeType)
               ->put($uploadUrl);
 
             if ($response->successful()) {
+                $this->lastError = null;
                 // Generate public URL
                 $publicUrl = $this->getPublicUrl($bucket, $filePath);
                 Log::info('File uploaded successfully to Supabase', [
@@ -85,6 +101,11 @@ class SupabaseService
                 ]);
                 return $publicUrl;
             } else {
+                $this->lastError = [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                    'headers' => $response->headers(),
+                ];
                 Log::error('Failed to upload file to Supabase', [
                     'bucket' => $bucket,
                     'path' => $filePath,
@@ -95,6 +116,9 @@ class SupabaseService
                 return null;
             }
         } catch (\Exception $e) {
+            $this->lastError = [
+                'error' => $e->getMessage(),
+            ];
             Log::error('Exception while uploading file to Supabase', [
                 'bucket' => $bucket,
                 'folder' => $folder,
@@ -160,22 +184,27 @@ class SupabaseService
     public function deleteFile(string $bucket, string $filePath): bool
     {
         try {
+            $authKey = $this->serviceKey ?: $this->key;
             $response = Http::withOptions([
                 'verify' => $this->sslVerify,
             ])->withHeaders([
-                'apikey' => $this->key,
-                'Authorization' => 'Bearer ' . $this->key,
+                'apikey' => $authKey,
+                'Authorization' => 'Bearer ' . $authKey,
             ])->delete(
                 $this->storageUrl . '/object/' . $bucket . '/' . $filePath
             );
 
             if ($response->successful()) {
+                $this->lastError = null;
                 Log::info('File deleted successfully from Supabase', [
                     'bucket' => $bucket,
                     'path' => $filePath,
                 ]);
                 return true;
             } else {
+                $this->lastError = [
+                    'status' => $response->status(),
+                ];
                 Log::error('Failed to delete file from Supabase', [
                     'bucket' => $bucket,
                     'path' => $filePath,
@@ -184,6 +213,9 @@ class SupabaseService
                 return false;
             }
         } catch (\Exception $e) {
+            $this->lastError = [
+                'error' => $e->getMessage(),
+            ];
             Log::error('Exception while deleting file from Supabase', [
                 'bucket' => $bucket,
                 'path' => $filePath,
