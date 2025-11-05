@@ -27,6 +27,9 @@ class Kursus extends Model
         'jam_tutup',
         'status',
         'foto_profil',
+        'pemilik_kursus',
+        'email',
+        'password',
     ];
 
     // Karena tidak ada kolom created_at & updated_at

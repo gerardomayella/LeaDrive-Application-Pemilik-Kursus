@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kursus;
+use App\Services\SupabaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -14,7 +15,22 @@ class AuthController extends Controller
      */
     public function showLoginForm()
     {
-        return view('login');
+        // Cek koneksi ke Supabase Storage di awal
+        $supabase = new SupabaseService();
+        $health = $supabase->checkConnection();
+        if (!(isset($health['ok']) && $health['ok'] === true)) {
+            // Tampilkan pesan error di halaman login
+            $message = 'Koneksi ke Supabase Storage bermasalah: ' . ($health['error'] ?? 'unknown error');
+            session()->flash('error', $message);
+        } else {
+            session()->flash('success', 'Terhubung ke Supabase Storage.');
+        }
+
+        $ok = isset($health['ok']) && $health['ok'] === true;
+        return view('login', [
+            'supabase_ok' => $ok,
+            'supabase_error' => $ok ? null : ($health['error'] ?? 'unknown error'),
+        ]);
     }
 
     /**
@@ -22,6 +38,15 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        // Cek koneksi sebelum proses login
+        $supabase = new SupabaseService();
+        $health = $supabase->checkConnection();
+        if (!(isset($health['ok']) && $health['ok'] === true)) {
+            return back()->withErrors([
+                'email_or_phone' => 'Tidak dapat terhubung ke penyimpanan (Supabase): ' . ($health['error'] ?? 'unknown error') . '. Silakan coba lagi atau hubungi admin.',
+            ])->withInput();
+        }
+
         $request->validate([
             'email_or_phone' => 'required|string',
             'password' => 'required|string',

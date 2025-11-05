@@ -247,7 +247,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('register.step1') }}" method="POST">
+            <form action="{{ route('register.step1.submit') }}" method="POST">
                 @csrf
                 
                 <div class="form-row">

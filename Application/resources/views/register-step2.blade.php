@@ -345,7 +345,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('register.step2') }}" method="POST" id="step2Form">
+            <form action="{{ route('register.step2.submit') }}" method="POST" id="step2Form">
                 @csrf
 
                 <div class="form-group">

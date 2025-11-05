@@ -187,6 +187,46 @@ class SupabaseService
         }
     }
 
+    public function checkConnection(): array
+    {
+        try {
+            if (!$this->url || !$this->storageUrl || !$this->key) {
+                return [
+                    'ok' => false,
+                    'error' => 'Missing SUPABASE_URL/KEY or STORAGE_URL',
+                ];
+            }
+
+            $endpoint = rtrim($this->storageUrl, '/') . '/bucket';
+            $response = Http::withHeaders([
+                'apikey' => $this->key,
+                'Authorization' => 'Bearer ' . $this->key,
+            ])->timeout(5)->get($endpoint);
+
+            if ($response->successful()) {
+                return ['ok' => true];
+            }
+
+            Log::error('Supabase Storage health check failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            return [
+                'ok' => false,
+                'error' => 'HTTP ' . $response->status(),
+                'body' => $response->body(),
+            ];
+        } catch (\Exception $e) {
+            Log::error('Supabase Storage health check exception', [
+                'error' => $e->getMessage(),
+            ]);
+            return [
+                'ok' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
     /**
      * Upload dokumen kursus ke bucket kursus
      *

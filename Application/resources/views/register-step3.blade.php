@@ -314,7 +314,7 @@
                 </ul>
             </div>
 
-            <form action="{{ route('register.step3') }}" method="POST" enctype="multipart/form-data" id="step3Form">
+            <form action="{{ route('register.step3.submit') }}" method="POST" enctype="multipart/form-data" id="step3Form">
                 @csrf
 
                 <!-- KTP Upload -->

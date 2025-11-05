@@ -54,7 +54,7 @@ class RegistrationController extends Controller
         // Store step 1 data in session
         $request->session()->put('registration.step1', $validated);
 
-        return redirect()->route('register.step2');
+        return redirect()->route('register.step2.show');
     }
 
     /**
@@ -63,7 +63,7 @@ class RegistrationController extends Controller
     public function showStep2(Request $request)
     {
         if (!$request->session()->has('registration.step1')) {
-            return redirect()->route('register.step1')->withErrors([
+            return redirect()->route('register.step1.show')->withErrors([
                 'session' => 'Silakan lengkapi data akun dasar terlebih dahulu.',
             ]);
         }
@@ -77,7 +77,7 @@ class RegistrationController extends Controller
     public function step2(Request $request)
     {
         if (!$request->session()->has('registration.step1')) {
-            return redirect()->route('register.step1');
+            return redirect()->route('register.step1.show');
         }
 
         $validated = $request->validate([
@@ -92,7 +92,7 @@ class RegistrationController extends Controller
         // Store step 2 data in session
         $request->session()->put('registration.step2', $validated);
 
-        return redirect()->route('register.step3');
+        return redirect()->route('register.step3.show');
     }
 
     /**
@@ -101,7 +101,7 @@ class RegistrationController extends Controller
     public function showStep3(Request $request)
     {
         if (!$request->session()->has('registration.step1') || !$request->session()->has('registration.step2')) {
-            return redirect()->route('register.step1')->withErrors([
+            return redirect()->route('register.step1.show')->withErrors([
                 'session' => 'Silakan lengkapi data sebelumnya terlebih dahulu.',
             ]);
         }
@@ -115,7 +115,7 @@ class RegistrationController extends Controller
     public function step3(Request $request)
     {
         if (!$request->session()->has('registration.step1') || !$request->session()->has('registration.step2')) {
-            return redirect()->route('register.step1');
+            return redirect()->route('register.step1.show');
         }
 
         $validated = $request->validate([
@@ -250,12 +250,12 @@ class RegistrationController extends Controller
     public function back(Request $request, $step)
     {
         if ($step == 2) {
-            return redirect()->route('register.step1');
+            return redirect()->route('register.step1.show');
         } elseif ($step == 3) {
-            return redirect()->route('register.step2');
+            return redirect()->route('register.step2.show');
         }
 
-        return redirect()->route('register.step1');
+        return redirect()->route('register.step1.show');
     }
 
     /**

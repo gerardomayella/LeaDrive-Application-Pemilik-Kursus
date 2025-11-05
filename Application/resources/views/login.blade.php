@@ -78,6 +78,22 @@
                 {{ session('success') }}
             </div>
         @endif
+        @if(session('error'))
+            <div style="background-color: #ff4444; color: #fff; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+                {{ session('error') }}
+            </div>
+        @endif
+        @isset($supabase_ok)
+            @if($supabase_ok && !session('success'))
+                <div style="background-color: #4caf50; color: #fff; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+                    Terhubung ke Supabase Storage.
+                </div>
+            @elseif(!$supabase_ok && $supabase_error && !session('error'))
+                <div style="background-color: #ff4444; color: #fff; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+                    Koneksi ke Supabase Storage bermasalah: {{ $supabase_error }}
+                </div>
+            @endif
+        @endisset
 
         @if ($errors->any())
             <div style="background-color: #ff4444; color: #fff; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
@@ -96,11 +112,11 @@
             <div style="text-align: left; margin-bottom: 1rem;">
                 <input type="checkbox" name="remember" id="remember">
                 <label for="remember">Ingat saya</label>
-                <a href="#" style="float: right;">Lupa password?</a>
+                <a href="{{ route('password.forgot.show') }}" style="float: right;">Lupa password?</a>
             </div>
             <button type="submit">Masuk</button>
         </form>
-        <p>Belum punya akun? <a href="{{ route('register.step1') }}">Daftar sekarang</a></p>
+        <p>Belum punya akun? <a href="{{ route('register.step1.show') }}">Daftar sekarang</a></p>
     </div>
 </body>
 </html>
