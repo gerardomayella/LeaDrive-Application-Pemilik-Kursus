@@ -10,6 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Http\Client\ConnectionException as HttpConnectionException;
+use Illuminate\Http\Client\RequestException as HttpRequestException;
+use Illuminate\Database\QueryException;
+use PDOException;
 
 class RegistrationController extends Controller
 {
@@ -133,7 +137,7 @@ class RegistrationController extends Controller
         ]);
 
         try {
-            DB::beginTransaction();
+            $txStarted = false;
 
             // Get data from session
             $step1 = $request->session()->get('registration.step1');
@@ -187,10 +191,8 @@ class RegistrationController extends Controller
                 // Tidak error jika optional file gagal upload
             }
 
-            // Jika ada error pada required documents, rollback
+            // Jika ada error pada required documents, batalkan tanpa transaksi DB
             if (!empty($errors)) {
-                DB::rollBack();
-                
                 // Delete uploaded files from Supabase
                 foreach ($uploadedFiles as $url) {
                     // Extract bucket and path from URL
@@ -201,6 +203,10 @@ class RegistrationController extends Controller
                     'error' => implode(' ', $errors),
                 ])->withInput();
             }
+
+            // Mulai transaksi DB setelah upload berhasil
+            DB::beginTransaction();
+            $txStarted = true;
 
             // Buat akun user (tabel users) sesuai schema baru
             $user = User::create([
@@ -245,7 +251,9 @@ class RegistrationController extends Controller
             return redirect()->route('login')->with('success', 'Registrasi berhasil! Akun Anda sedang menunggu persetujuan admin.');
 
         } catch (\Exception $e) {
-            DB::rollBack();
+            if (isset($txStarted) && $txStarted) {
+                DB::rollBack();
+            }
             
             // Delete uploaded files from Supabase if any
             if (isset($supabaseService) && !empty($uploadedFiles)) {
@@ -254,8 +262,20 @@ class RegistrationController extends Controller
                 }
             }
 
+            $userMessage = 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage();
+            if ($e instanceof HttpConnectionException || $e instanceof HttpRequestException) {
+                $userMessage = 'Layanan penyimpanan sedang tidak dapat diakses atau lambat (bad gateway/timeout). Silakan coba lagi beberapa saat.';
+            } elseif ($e instanceof QueryException || $e instanceof PDOException) {
+                $userMessage = 'Server database sedang sibuk/tidak dapat diakses karena traffic. Silakan coba lagi beberapa saat.';
+            } else {
+                $msg = $e->getMessage();
+                if (stripos($msg, 'bad gateway') !== false || stripos($msg, '502') !== false || stripos($msg, '503') !== false || stripos($msg, 'service unavailable') !== false || stripos($msg, 'gateway') !== false) {
+                    $userMessage = 'Terjadi gangguan jaringan (Bad Gateway/Service Unavailable). Silakan coba lagi beberapa saat.';
+                }
+            }
+
             return back()->withErrors([
-                'error' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(),
+                'error' => $userMessage,
             ])->withInput();
         }
     }

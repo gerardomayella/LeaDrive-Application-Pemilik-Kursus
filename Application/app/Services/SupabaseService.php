@@ -82,7 +82,7 @@ class SupabaseService
             // Upload ke Supabase Storage menggunakan PUT method
             $response = Http::withOptions([
                 'verify' => $this->sslVerify,
-            ])->withHeaders([
+            ])->timeout(20)->retry(2, 500)->withHeaders([
                 'apikey' => $authKey,
                 'Authorization' => 'Bearer ' . $authKey,
                 'Content-Type' => $mimeType,
@@ -187,7 +187,7 @@ class SupabaseService
             $authKey = $this->serviceKey ?: $this->key;
             $response = Http::withOptions([
                 'verify' => $this->sslVerify,
-            ])->withHeaders([
+            ])->timeout(15)->retry(2, 500)->withHeaders([
                 'apikey' => $authKey,
                 'Authorization' => 'Bearer ' . $authKey,
             ])->delete(
