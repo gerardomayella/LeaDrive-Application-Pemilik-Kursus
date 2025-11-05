@@ -17,11 +17,13 @@ class DokumenKursus extends Model
 
     protected $fillable = [
         'ktp',
-        'Izin_usaha',
+        'izin_usaha',
         'sertif_instruktur',
         'dokumen_legal',
         'id_request',
     ];
+
+    public $timestamps = false;
 
     /**
      * Relasi ke tabel Request

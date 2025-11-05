@@ -42,7 +42,8 @@ $getSupabaseUrl = function() {
 };
 
 $supabaseUrl = $getSupabaseUrl();
-$storageUrl = env('SUPABASE_STORAGE_URL');
+// Prioritaskan env baru SUPABASE_STORAGE_PUBLIC_URL, fallback ke SUPABASE_STORAGE_URL, lalu auto dari SUPABASE_URL
+$storageUrl = env('SUPABASE_STORAGE_PUBLIC_URL') ?: env('SUPABASE_STORAGE_URL');
 if (!$storageUrl && $supabaseUrl) {
     $storageUrl = $supabaseUrl . '/storage/v1';
 }
@@ -57,8 +58,11 @@ return [
     |
     */
     'url' => $supabaseUrl,
-    'key' => env('SUPABASE_KEY', ''),
+    // Gunakan ANON key secara default untuk operasi publik (fallback ke SUPABASE_KEY atau SERVICE_ROLE jika diperlukan)
+    'key' => env('SUPABASE_ANON_KEY', env('SUPABASE_KEY', env('SUPABASE_SERVICE_ROLE_KEY', ''))),
     'storage_url' => $storageUrl,
+    // Verifikasi SSL untuk HTTP client ke Supabase. Set false di lingkungan lokal bila terjadi cURL error 60
+    'ssl_verify' => env('SUPABASE_SSL_VERIFY', true),
     
     /*
     |--------------------------------------------------------------------------

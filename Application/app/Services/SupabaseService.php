@@ -11,6 +11,7 @@ class SupabaseService
     protected $url;
     protected $key;
     protected $storageUrl;
+    protected $sslVerify;
 
     public function __construct()
     {
@@ -18,6 +19,7 @@ class SupabaseService
         $this->url = config('supabase.url');
         $this->key = config('supabase.key');
         $this->storageUrl = config('supabase.storage_url');
+        $this->sslVerify = (bool) config('supabase.ssl_verify', true);
         
         // Validasi konfigurasi
         if (!$this->key) {
@@ -63,7 +65,9 @@ class SupabaseService
             $uploadUrl = rtrim($this->storageUrl, '/') . '/object/' . $bucket . '/' . $filePath;
 
             // Upload ke Supabase Storage menggunakan PUT method
-            $response = Http::withHeaders([
+            $response = Http::withOptions([
+                'verify' => $this->sslVerify,
+            ])->withHeaders([
                 'apikey' => $this->key,
                 'Authorization' => 'Bearer ' . $this->key,
                 'Content-Type' => $mimeType,
@@ -156,7 +160,9 @@ class SupabaseService
     public function deleteFile(string $bucket, string $filePath): bool
     {
         try {
-            $response = Http::withHeaders([
+            $response = Http::withOptions([
+                'verify' => $this->sslVerify,
+            ])->withHeaders([
                 'apikey' => $this->key,
                 'Authorization' => 'Bearer ' . $this->key,
             ])->delete(
@@ -193,12 +199,14 @@ class SupabaseService
             if (!$this->url || !$this->storageUrl || !$this->key) {
                 return [
                     'ok' => false,
-                    'error' => 'Missing SUPABASE_URL/KEY or STORAGE_URL',
+                    'error' => 'TERJADI KESALAHAN KONEKSI KE SUPABASE STORAGE',
                 ];
             }
 
             $endpoint = rtrim($this->storageUrl, '/') . '/bucket';
-            $response = Http::withHeaders([
+            $response = Http::withOptions([
+                'verify' => $this->sslVerify,
+            ])->withHeaders([
                 'apikey' => $this->key,
                 'Authorization' => 'Bearer ' . $this->key,
             ])->timeout(5)->get($endpoint);

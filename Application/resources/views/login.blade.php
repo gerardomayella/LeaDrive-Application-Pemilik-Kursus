@@ -6,6 +6,7 @@
     <title>Login - LeadDrive</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
+        * { box-sizing: border-box; }
         body {
             background-color: #1c1c1c;
             color: #fff;
@@ -66,6 +67,11 @@
         .login-container a:hover {
             text-decoration: underline;
         }
+        .alert { width: 100%; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; text-align: center; }
+        .alert-success { background-color: #4caf50; color: #fff; }
+        .alert-error { background-color: #ff4444; color: #fff; }
+        .actions-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+        .remember { display: flex; align-items: center; gap: 0.5rem; }
     </style>
 </head>
 <body>
@@ -74,29 +80,21 @@
         <h1>Masuk ke LeadDrive</h1>
         <p>Kelola kursus mengemudi Anda dengan mudah</p>
         @if(session('success'))
-            <div style="background-color: #4caf50; color: #fff; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
-                {{ session('success') }}
-            </div>
+            <div class="alert alert-success">{{ session('success') }}</div>
         @endif
         @if(session('error'))
-            <div style="background-color: #ff4444; color: #fff; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
-                {{ session('error') }}
-            </div>
+            <div class="alert alert-error">{{ session('error') }}</div>
         @endif
         @isset($supabase_ok)
             @if($supabase_ok && !session('success'))
-                <div style="background-color: #4caf50; color: #fff; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
-                    Terhubung ke Supabase Storage.
-                </div>
+                <div class="alert alert-success">Terhubung ke Supabase Storage.</div>
             @elseif(!$supabase_ok && $supabase_error && !session('error'))
-                <div style="background-color: #ff4444; color: #fff; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
-                    Koneksi ke Supabase Storage bermasalah: {{ $supabase_error }}
-                </div>
+                <div class="alert alert-error">Koneksi ke Supabase Storage bermasalah: {{ $supabase_error }}</div>
             @endif
         @endisset
 
         @if ($errors->any())
-            <div style="background-color: #ff4444; color: #fff; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+            <div class="alert alert-error">
                 <ul style="list-style: none; padding: 0; margin: 0;">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -109,10 +107,12 @@
             @csrf
             <input type="text" name="email_or_phone" placeholder="Masukkan email atau nomor HP" value="{{ old('email_or_phone') }}" required>
             <input type="password" name="password" placeholder="Masukkan password" required>
-            <div style="text-align: left; margin-bottom: 1rem;">
-                <input type="checkbox" name="remember" id="remember">
-                <label for="remember">Ingat saya</label>
-                <a href="{{ route('password.forgot.show') }}" style="float: right;">Lupa password?</a>
+            <div class="actions-row">
+                <label class="remember">
+                    <input type="checkbox" name="remember" id="remember">
+                    <span>Ingat saya</span>
+                </label>
+                <a href="{{ route('password.forgot.show') }}">Lupa password?</a>
             </div>
             <button type="submit">Masuk</button>
         </form>

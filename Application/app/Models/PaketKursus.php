@@ -9,19 +9,20 @@ class PaketKursus extends Model
 {
     use HasFactory;
 
-    protected $table = 'paketKursus';
+    protected $table = 'paket_kursus';
     protected $primaryKey = 'id_paket';
 
     protected $keyType = 'int';
-    public $incrementing = true;
+    public $incrementing = false;
 
     protected $fillable = [
-        'jenis_mobil',
-        'durasi',
-        'id_kursus',
+        'nama_paket',
+        'harga',
+        'durasi_jam',
         'deskripsi',
+        'id_kursus',
     ];
 
-    
+    public $timestamps = true;
 }
 

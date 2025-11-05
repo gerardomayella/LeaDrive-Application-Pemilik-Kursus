@@ -19,6 +19,11 @@ return new class extends Migration
             $table->time('jam_tutup')->nullable();
             $table->boolean('status')->default(false);
             $table->string('foto_profil')->nullable();
+            $table->string('nama_pemilik')->nullable();
+            $table->string('email')->nullable();
+            $table->string('password');
+            $table->string('longitude')->nullable();
+            $table->string('latitude')->nullable();
             $table->timestamps();
         });
     }

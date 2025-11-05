@@ -22,9 +22,10 @@ class Request extends Model
         'lokasi',
         'jam_buka',
         'jam_tutup',
-        'password',
-        'nomor_hp',
-        'email',
+        'id_user',
+        'jenis_kendaraan',
+        'latitude',
+        'longitude',
     ];
 
     public $timestamps = false;

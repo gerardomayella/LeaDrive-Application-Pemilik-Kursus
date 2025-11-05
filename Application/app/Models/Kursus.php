@@ -27,13 +27,15 @@ class Kursus extends Model
         'jam_tutup',
         'status',
         'foto_profil',
-        'pemilik_kursus',
+        'nama_pemilik',
         'email',
         'password',
+        'longitude',
+        'latitude',
     ];
 
-    // Karena tidak ada kolom created_at & updated_at
-    public $timestamps = false;
+    // Menggunakan kolom created_at & updated_at sesuai schema
+    public $timestamps = true;
 
     /**
      * Relasi ke tabel Instruktur

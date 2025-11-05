@@ -29,7 +29,6 @@ class Instruktur extends Model
         'nomor_sim',
         'status_aktif',
         'id_kursus',
-        'foto_profil',
     ];
 
     // Jika tabel kamu tidak punya kolom created_at dan updated_at

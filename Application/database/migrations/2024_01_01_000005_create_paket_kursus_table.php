@@ -17,7 +17,7 @@ return new class extends Migration
             $table->decimal('harga', 10, 2);
             $table->integer('durasi_jam');
             $table->text('deskripsi')->nullable();
-            $table->bigInteger('id_request');
+            $table->bigInteger('id_kursus')->nullable();
             $table->timestamps();
         });
     }

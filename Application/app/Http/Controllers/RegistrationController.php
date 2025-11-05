@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Request as RequestModel;
 use App\Models\DokumenKursus;
+use App\Models\User;
 use App\Services\SupabaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -29,12 +30,11 @@ class RegistrationController extends Controller
             'name' => 'required|string|max:255',
             'email' => [
                 'required','string','email','max:255',
-                Rule::unique('kursus','email'),
-                Rule::unique('request_akun','email'),
+                Rule::unique('users','email'),
             ],
             'nomor_hp' => [
                 'required', 'regex:/^[0-9]{8,20}$/',
-                Rule::unique('request_akun','nomor_hp'),
+                Rule::unique('users','nomor_hp'),
             ],
             'password' => [
                 'required',
@@ -198,22 +198,30 @@ class RegistrationController extends Controller
                 ])->withInput();
             }
 
-            // Create request_akun sesuai schema
+            // Buat akun user (tabel users) sesuai schema baru
+            $user = User::create([
+                'name' => $step1['name'],
+                'email' => $step1['email'],
+                'password' => Hash::make($step1['password']),
+                'nomor_hp' => $step1['nomor_hp'],
+                'role' => 'pemilik_kursus',
+                'status' => 'pending',
+            ]);
+
+            // Create request_akun sesuai schema (link ke users)
             $requestModel = RequestModel::create([
                 'waktu' => now(),
                 'nama_kursus' => $step2['nama_kursus'],
                 'lokasi' => $step2['lokasi'],
                 'jam_buka' => $step2['jam_buka'],
                 'jam_tutup' => $step2['jam_tutup'],
-                'password' => Hash::make($step1['password']),
-                'nomor_hp' => $step1['nomor_hp'],
-                'email' => $step1['email'],
+                'id_user' => $user->id,
             ]);
 
             
             DokumenKursus::create([
                 'ktp' => $ktpUrl,
-                'Izin_usaha' => $izinUsahaUrl,
+                'izin_usaha' => $izinUsahaUrl,
                 'sertif_instruktur' => $sertifUrl,
                 'dokumen_legal' => $dokumenLegalUrl,
                 'id_request' => $requestModel->id_request,

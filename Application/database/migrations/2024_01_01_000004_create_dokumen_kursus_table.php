@@ -17,8 +17,8 @@ return new class extends Migration
             $table->text('izin_usaha')->nullable();
             $table->text('sertif_instruktur')->nullable();
             $table->text('dokumen_legal')->nullable();
-            $table->bigInteger('id_request');
-            $table->timestamps();
+            $table->bigInteger('id_request')->nullable();
+            $table->foreign('id_request')->references('id_request')->on('request_akun');
         });
     }
 
