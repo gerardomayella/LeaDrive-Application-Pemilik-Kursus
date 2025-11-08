@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -23,3 +24,7 @@ Route::get('/password/forgot', [PasswordResetController::class, 'showForgot'])->
 Route::post('/password/forgot', [PasswordResetController::class, 'sendOtp'])->name('password.forgot.send');
 Route::get('/password/verify', [PasswordResetController::class, 'showVerify'])->name('password.verify.show');
 Route::post('/password/verify', [PasswordResetController::class, 'verifyAndReset'])->name('password.verify.reset');
+
+// Dashboard (requires kursus session)
+Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
+

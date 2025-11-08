@@ -72,9 +72,29 @@ class AuthController extends Controller
         $password = (string) $request->input('password');
 
         $passwordMatches = false;
+        $needsRehash = false;
         if (!empty($kursus->password)) {
-            // Coba verifikasi hash terlebih dahulu
-            $passwordMatches = Hash::check($password, $kursus->password) || $kursus->password === $password;
+            $stored = (string) $kursus->password;
+            $isHashed = str_starts_with($stored, '$');
+
+            if ($isHashed) {
+                // Verifikasi hash modern (bcrypt/argon) secara otomatis
+                $passwordMatches = password_verify($password, $stored);
+
+                if ($passwordMatches) {
+                    $isBcrypt = preg_match('/^\$2[aby]\$/', $stored) === 1;
+                    // Rehash jika bukan bcrypt, atau bcrypt tapi butuh rehash
+                    if (!$isBcrypt || password_needs_rehash($stored, PASSWORD_BCRYPT)) {
+                        $needsRehash = true;
+                    }
+                }
+            } else {
+                // Legacy plaintext
+                $passwordMatches = hash_equals($stored, $password);
+                if ($passwordMatches) {
+                    $needsRehash = true;
+                }
+            }
         }
 
         if (!$passwordMatches) {
@@ -87,6 +107,12 @@ class AuthController extends Controller
             return back()->withErrors([
                 'email_or_phone' => 'Akun kursus Anda belum disetujui admin.',
             ]);
+        }
+
+        // Upgrade hash jika diperlukan (normalisasi ke konfigurasi default, mis. bcrypt)
+        if ($needsRehash) {
+            $kursus->password = Hash::make($password);
+            $kursus->save();
         }
 
         // Simpan session sederhana untuk menandai login kursus
