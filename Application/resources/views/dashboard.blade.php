@@ -3,97 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - LeadDrive</title>
+    <title>Dashboard Pemilik Kursus - LeadDrive</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
         * { box-sizing: border-box; }
-        body { background-color:#1c1c1c; color:#fff; font-family: Arial, sans-serif; margin:0; }
-        .header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #333; background:#1c1c1c; position:sticky; top:0; z-index:10; }
-        .brand { display:flex; align-items:center; gap:10px; }
-        .brand img { width:36px; height:36px; border-radius:6px; object-fit:cover; }
-        .brand .name { color:#ff7f00; font-weight:700; letter-spacing:0.3px; }
-        .actions { display:flex; align-items:center; gap:12px; }
-        .icon-btn { width:38px; height:38px; display:grid; place-items:center; background:#2c2c2c; border:1px solid #3a3a3a; border-radius:8px; cursor:pointer; }
-        .avatar { width:38px; height:38px; border-radius:50%; object-fit:cover; border:2px solid #3a3a3a; background:#2c2c2c; }
-        .container { padding:20px; max-width:1100px; margin:0 auto; }
-        .section-title { margin:18px 0 10px; color:#ccc; font-size:14px; text-transform:uppercase; letter-spacing:.4px; }
-        .summary { display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; }
-        .card { background:#2c2c2c; border:1px solid #3a3a3a; border-radius:10px; padding:16px; }
-        .card h3 { margin:0 0 8px; color:#ff7f00; font-size:16px; }
-        .card p { margin:4px 0; color:#ddd; font-size:14px; }
-        .menu-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
-        .menu-item { display:flex; flex-direction:column; gap:8px; padding:16px; background:#2c2c2c; border:1px solid #3a3a3a; border-radius:10px; text-decoration:none; color:#fff; transition:transform .08s ease, background .2s ease; }
-        .menu-item:hover { transform: translateY(-2px); background:#303030; }
-        .menu-item .title { color:#ff7f00; font-weight:600; }
-        .menu-item .desc { color:#cfcfcf; font-size:13px; }
-        @media (max-width: 992px) { .summary { grid-template-columns: repeat(2, 1fr); } .menu-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 560px) { .summary, .menu-grid { grid-template-columns: 1fr; } }
+        body { margin:0; font-family: Arial, sans-serif; background:#0f141a; color:#e6e6e6; }
+        .topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 22px; background:#0c1117; border-bottom:1px solid #1f2a36; position:sticky; top:0; z-index:20; }
+        .brand { display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.4px; color:#ffb255; }
+        .brand img { width:28px; height:28px; border-radius:6px; object-fit:cover; }
+        .right { display:flex; align-items:center; gap:10px; }
+        .avatar { width:36px; height:36px; border-radius:50%; border:2px solid #223140; background:#14202b; object-fit:cover; }
+        .btn { display:inline-flex; align-items:center; gap:8px; border:0; cursor:pointer; background:#1b2733; color:#e6e6e6; padding:10px 14px; border-radius:10px; border:1px solid #263646; text-decoration:none; font-weight:600; }
+        .btn:hover { background:#213142; }
+        .btn-primary { background:#ff8a00; color:#111; border-color:#ff9f33; }
+        .btn-primary:hover { background:#ffa640; }
+        .btn-danger { background:#c73b2f; border-color:#d25a50; color:#fff; }
+        .container { max-width:1040px; margin:22px auto; padding:0 18px; }
+
+        .card-shell { background:#121a22; border:1px solid #243243; border-radius:16px; padding:26px; box-shadow:0 10px 30px rgba(0,0,0,.35); }
+        .title-wrap { text-align:center; margin-bottom:18px; }
+        .title { margin:4px 0 6px; font-size:26px; color:#ffb255; }
+        .subtitle { margin:0; color:#b9c3cd; }
+
+        .alert { display:flex; align-items:center; justify-content:space-between; gap:10px; background:#3a260d; border:1px solid #6a4a1d; color:#ffd7a3; padding:14px; border-radius:12px; margin:16px 0 22px; }
+        .alert .left { display:flex; align-items:center; gap:10px; }
+
+        .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+        .stat { background:#1a2430; border:1px solid #2a3a4b; border-radius:12px; padding:16px; }
+        .stat .label { color:#c5d0db; font-size:13px; }
+        .stat .value { color:#57b7ff; font-weight:800; font-size:22px; margin-top:6px; }
+
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        .panel { background:#121a22; border:1px solid #243243; border-radius:12px; padding:18px; }
+        .panel h3 { margin:0 0 12px; color:#ffb255; }
+        .menu { display:flex; flex-direction:column; gap:10px; }
+        .menu a, .menu .item-disabled { display:flex; align-items:center; gap:10px; background:#1a2430; border:1px solid #2a3a4b; color:#e6e6e6; text-decoration:none; padding:12px 14px; border-radius:10px; }
+        .menu a:hover { background:#202e3c; }
+        .item-disabled { opacity:.6; cursor:not-allowed; }
+
+        /* table for current activities */
+        .table { width:100%; border-collapse:separate; border-spacing:0; }
+        .table th, .table td { text-align:left; padding:10px 12px; border-bottom:1px solid #243243; }
+        .table th { color:#c5d0db; font-weight:700; background:#101820; position:sticky; top:0; }
+        .table tr:hover td { background:#16222c; }
+
+        .footer { display:flex; justify-content:center; margin-top:20px; }
+
+        @media (max-width: 900px) {
+            .stats { grid-template-columns:1fr; }
+            .two-col { grid-template-columns:1fr; }
+        }
     </style>
 </head>
 <body>
-    <header class="header">
+    <header class="topbar">
         <div class="brand">
             <img src="{{ asset('images/logo.jpg') }}" alt="LeadDrive">
-            <div class="name">LEADRIVE</div>
+            LeadDrive
         </div>
-        <div class="actions">
-            <button class="icon-btn" title="Notifikasi" aria-label="Notifikasi">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="#ff7f00" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C10.34 2 9 3.34 9 5V5.29C6.72 6.15 5 8.39 5 11V16L3 18V19H21V18L19 16V11C19 8.39 17.28 6.15 15 5.29V5C15 3.34 13.66 2 12 2Z"/>
-                </svg>
-            </button>
+        <div class="right">
             <img class="avatar" src="{{ $kursus && $kursus->foto_logo ? asset('storage/'.$kursus->foto_logo) : asset('images/logo.jpg') }}" alt="Profil Kursus">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="btn btn-danger">Keluar</button>
+            </form>
         </div>
     </header>
 
     <main class="container">
-        <h2 class="section-title">Ringkasan Kursus</h2>
-        <section class="summary">
-            <div class="card">
-                <h3>Nama Kursus</h3>
-                <p>{{ $summary['nama'] }}</p>
+        <div class="card-shell">
+            <div class="title-wrap">
+                <div style="font-size:28px">👤</div>
+                <h1 class="title">Dashboard Pemilik Kursus</h1>
+                <p class="subtitle">Kelola profil dan operasional kursus mengemudi Anda</p>
             </div>
-            <div class="card">
-                <h3>Status</h3>
-                <p>{{ $summary['status'] }}</p>
-            </div>
-            <div class="card">
-                <h3>Email</h3>
-                <p>{{ $summary['email'] }}</p>
-            </div>
-            <div class="card">
-                <h3>No. Telepon</h3>
-                <p>{{ $summary['telepon'] }}</p>
-            </div>
-        </section>
 
-        <h2 class="section-title">Kelola Kursus</h2>
-        <nav class="menu-grid">
-            <a href="#" class="menu-item">
-                <div class="title">Tambah Profil Kursus</div>
-                <div class="desc">Lengkapi identitas, alamat, jam operasional, dan logo.</div>
-            </a>
-            <a href="#" class="menu-item">
-                <div class="title">Atur Paket Kursus</div>
-                <div class="desc">Tambah/edit paket, harga, durasi, dan fasilitas.</div>
-            </a>
-            <a href="#" class="menu-item">
-                <div class="title">Kelola Instruktur</div>
-                <div class="desc">Kelola profil dan ketersediaan instruktur.</div>
-            </a>
-            <a href="#" class="menu-item">
-                <div class="title">Pesanan Kursus</div>
-                <div class="desc">Pantau pesanan, pembayaran, dan status jadwal.</div>
-            </a>
-            <a href="#" class="menu-item">
-                <div class="title">Rating & Ulasan</div>
-                <div class="desc">Tinjau kepuasan peserta dan tanggapi ulasan.</div>
-            </a>
-            <a href="#" class="menu-item">
-                <div class="title">Kelola Kendaraan</div>
-                <div class="desc">Tambah/edit kendaraan praktik dan status servis.</div>
-            </a>
-        </nav>
+            @php $profilLengkap = (bool)($kursus->status ?? false); @endphp
+
+            <section class="stats">
+                <div class="stat">
+                    <div class="label">Pesanan Hari Ini</div>
+                    <div class="value">0</div>
+                </div>
+                <div class="stat">
+                    <div class="label">Total Peserta</div>
+                    <div class="value">0</div>
+                </div>
+                <div class="stat">
+                    <div class="label">Jadwal Aktif</div>
+                    <div class="value">0</div>
+                </div>
+            </section>
+
+            <section class="two-col">
+                <div class="panel">
+                    <h3>Menu Utama</h3>
+                    <div class="menu">
+                        <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Atur Paket Kursus</div>
+                        <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Kelola Instruktur</div>
+                        <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Pesanan Kursus</div>
+                        <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Rating & Ulasan</div>
+                        <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Kelola Kendaraan</div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3>Aktivitas Saat Ini</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Peserta</th>
+                                <th>Instruktur</th>
+                                <th>Paket</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="3" style="opacity:.8">Belum ada data aktivitas</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="footer">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-danger">Keluar</button>
+                </form>
+            </div>
+        </div>
     </main>
 </body>
 </html>
