@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PaketController;
 
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -27,4 +28,9 @@ Route::post('/password/verify', [PasswordResetController::class, 'verifyAndReset
 
 // Dashboard (requires kursus session)
 Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
+
+// Paket Kursus
+Route::get('/paket', [PaketController::class, 'index'])->name('paket.index');
+Route::get('/paket/create', [PaketController::class, 'create'])->name('paket.create');
+Route::post('/paket', [PaketController::class, 'store'])->name('paket.store');
 

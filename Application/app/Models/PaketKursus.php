@@ -13,13 +13,14 @@ class PaketKursus extends Model
     protected $primaryKey = 'id_paket';
 
     protected $keyType = 'int';
-    public $incrementing = false;
+    public $incrementing = true;
 
     protected $fillable = [
         'nama_paket',
         'harga',
         'durasi_jam',
         'deskripsi',
+        'jenis_kendaraan',
         'id_kursus',
     ];
 

@@ -99,7 +99,7 @@
                 <div class="panel">
                     <h3>Menu Utama</h3>
                     <div class="menu">
-                        <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Atur Paket Kursus</div>
+                        <a href="{{ route('paket.index') }}">Atur Paket Kursus</a>
                         <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Kelola Instruktur</div>
                         <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Pesanan Kursus</div>
                         <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Rating & Ulasan</div>
