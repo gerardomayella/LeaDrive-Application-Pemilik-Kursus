@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
         * { box-sizing: border-box; }
-        body { margin:0; font-family: Arial, sans-serif; background:#0f141a; color:#e6e6e6; }
+        body { margin:0; font-family: Arial, sans-serif; background:#0f141a; color:#e6e6e6; overflow-x:hidden; }
         .topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 22px; background:#0c1117; border-bottom:1px solid #1f2a36; position:sticky; top:0; z-index:20; }
         .brand { display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.4px; color:#ffb255; }
         .brand img { width:28px; height:28px; border-radius:6px; object-fit:cover; }
@@ -30,7 +30,8 @@
         .sb-link:hover { background:#182332; border-color:#2a3d51; }
         .sb-link.active { background:#23364a; border-color:#34506a; }
         .sb-bottom { margin-top:auto; }
-        .has-sidebar .container { margin-left:88px; }
+        .has-sidebar .container { margin-left:88px; width:calc(100% - 88px); }
+        .panel, .card-shell { overflow-x:auto; }
     
     </style>
     @stack('styles')
