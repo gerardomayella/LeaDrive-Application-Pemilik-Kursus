@@ -100,10 +100,10 @@
                     <h3>Menu Utama</h3>
                     <div class="menu">
                         <a href="{{ route('paket.index') }}">Atur Paket Kursus</a>
-                        <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Kelola Instruktur</div>
-                        <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Pesanan Kursus</div>
+                        <a href="{{ route('instruktur.index') }}">Kelola Instruktur</a>
+                        <a href="{{ route('orders.index') }}">Pesanan Kursus</a>
                         <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Rating & Ulasan</div>
-                        <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Kelola Kendaraan</div>
+                        <a href="{{ route('mobil.index') }}">Kelola Kendaraan</a>
                     </div>
                 </div>
                 <div class="panel">

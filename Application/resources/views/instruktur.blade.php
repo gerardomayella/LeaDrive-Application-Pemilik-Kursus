@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atur Paket Kursus - LeadDrive</title>
+    <title>Kelola Instruktur - LeadDrive</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
         body { margin:0; font-family: Arial, sans-serif; background:#0f141a; color:#e6e6e6; }
@@ -21,10 +21,10 @@
         .empty .desc { color:#9fb0bf; margin:0 0 12px; }
         .btn { display:inline-flex; align-items:center; gap:8px; border:0; cursor:pointer; background:#1b2733; color:#e6e6e6; padding:10px 14px; border-radius:10px; border:1px solid #263646; text-decoration:none; font-weight:600; }
         .btn:hover { background:#213142; }
-        .btn-primary { background:#ff8a00; color:#111; border-color:#ff9f33; }
-        .btn-primary:hover { background:#ffa640; }
-        .row { background:#0f1923; border:1px solid #2b3a49; border-radius:10px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; }
-        .row-actions { display:flex; gap:8px; }
+        .item { background:#0f1923; border:1px solid #2b3a49; border-radius:10px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; }
+        .name { font-weight:800; color:#ffcc8a }
+        .muted { opacity:.85 }
+        .row-actions { display:flex; gap:8px; align-items:center; }
         .pill { padding:6px 10px; border-radius:8px; border:1px solid #2b3a49; background:#1a2430; color:#e6e6e6; text-decoration:none; font-size:13px; }
         .pill:hover { background:#203041; }
         .pill-danger { background:#8b2f28; border-color:#b9453c; color:#fff; }
@@ -34,7 +34,6 @@
         .pagination { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
         .pagination a, .pagination span { padding:6px 10px; border:1px solid #2b3a49; border-radius:8px; text-decoration:none; color:#e6e6e6; }
         .pagination .active span { background:#ff8a00; color:#111; border-color:#ff9f33; }
-        .footer-actions { margin-top:22px; }
         .sortbar { display:flex; align-items:center; gap:8px; }
         .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; padding:20px; }
         .modal { background:#121a22; border:1px solid #243243; border-radius:12px; padding:18px; max-width:420px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,.45); }
@@ -46,9 +45,9 @@
     <main class="container">
         <div class="shell">
             <div class="title-wrap">
-                <div class="icon">📦</div>
-                <h1 class="title">Atur Paket Kursus</h1>
-                <p class="subtitle">Kelola paket kursus yang ditawarkan kepada peserta</p>
+                <div class="icon">👨‍🏫</div>
+                <h1 class="title">Kelola Instruktur</h1>
+                <p class="subtitle">Kelola data instruktur yang terlibat dalam kursus mengemudi</p>
             </div>
 
             @if(session('success'))
@@ -56,70 +55,70 @@
             @endif
 
             <div class="actions" style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
-                <form method="GET" class="search" action="{{ route('paket.index') }}">
-                    <input class="input" type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari nama paket, deskripsi, atau jenis kendaraan...">
+                <form method="GET" class="search" action="{{ route('instruktur.index') }}">
+                    <input class="input" type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari nama, email, atau SIM...">
                     <button class="btn" type="submit">Cari</button>
                 </form>
                 <div class="sortbar">
                     @php
-                        function sortLinkP($key, $label, $q, $sort, $dir){
+                        $dirToggle = ($dir ?? 'desc') === 'asc' ? 'desc' : 'asc';
+                        function sortLink($key, $label, $q, $sort, $dir){
                             $params = ['q'=>$q,'sort'=>$key,'dir'=>($sort===$key && $dir==='asc')?'desc':'asc'];
-                            $url = route('paket.index',$params);
+                            $url = route('instruktur.index',$params);
                             $arrow = $sort===$key ? ($dir==='asc'?'↑':'↓') : '';
                             return '<a class="pill" href="'.$url.'">'.$label.' '.$arrow.'</a>';
                         }
                     @endphp
-                    {!! sortLinkP('terbaru','Terbaru',$q??'', $sort??'terbaru', $dir??'desc') !!}
-                    {!! sortLinkP('nama','Nama',$q??'', $sort??'terbaru', $dir??'desc') !!}
-                    {!! sortLinkP('harga','Harga',$q??'', $sort??'terbaru', $dir??'desc') !!}
-                    {!! sortLinkP('durasi','Durasi',$q??'', $sort??'terbaru', $dir??'desc') !!}
-                    {!! sortLinkP('jenis','Jenis Mobil',$q??'', $sort??'terbaru', $dir??'desc') !!}
+                    {!! sortLink('terbaru','Terbaru',$q??'', $sort??'terbaru', $dir??'desc') !!}
+                    {!! sortLink('nama','Nama',$q??'', $sort??'terbaru', $dir??'desc') !!}
+                    {!! sortLink('status','Status',$q??'', $sort??'terbaru', $dir??'desc') !!}
                 </div>
-                <a class="link" href="{{ route('paket.create') }}">＋ Tambah Paket Baru</a>
+                <a class="link" href="{{ route('instruktur.create') }}">＋ Tambah Instruktur Baru</a>
             </div>
 
-            @if(isset($pakets) && $pakets->count())
+            @if(isset($instrukturs) && $instrukturs->count())
                 <div style="display:grid; gap:12px;">
-                    @foreach($pakets as $p)
-                        <div class="row">
+                    @foreach($instrukturs as $i)
+                        <div class="item">
                             <div>
-                                <div style="font-weight:800; color:#ffcc8a">{{ $p->nama_paket }}</div>
-                                <div style="opacity:.85">Rp {{ number_format($p->harga,0,',','.') }} · {{ $p->durasi_jam }} jam</div>
+                                <div class="name">{{ $i->nama }}</div>
+                                <div class="muted">{{ $i->email }} @if($i->nomor_sim) · SIM: {{ $i->nomor_sim }} @endif</div>
                             </div>
                             <div class="row-actions">
-                                <a class="pill" href="{{ route('paket.edit',$p->id_paket) }}">Edit</a>
-                                <button class="pill pill-danger" data-delete="{{ route('paket.destroy',$p->id_paket) }}" data-name="{{ $p->nama_paket }}">Hapus</button>
+                                <span class="muted">{{ $i->status_aktif ? 'Aktif' : 'Non-aktif' }}</span>
+                                <a class="pill" href="{{ route('instruktur.edit',$i->id_instruktur) }}">Edit</a>
+                                <button class="pill pill-danger" data-delete="{{ route('instruktur.destroy',$i->id_instruktur) }}" data-name="{{ $i->nama }}">Hapus</button>
                             </div>
                         </div>
                     @endforeach
                 </div>
                 <div class="pagination">
-                    {{ $pakets->links() }}
+                    {{ $instrukturs->links() }}
                 </div>
             @else
                 <section class="empty">
-                    <div class="icon">📦</div>
-                    <h3 class="title">Belum Ada Paket Kursus</h3>
-                    <p class="desc">Buat paket kursus pertama Anda untuk mulai menerima peserta</p>
-                    <a class="link" href="{{ route('paket.create') }}">＋ Buat Paket Pertama</a>
+                    <div class="icon">👨‍🏫</div>
+                    <h3 class="title">Belum Ada Instruktur</h3>
+                    <p class="desc">Tambahkan instruktur pertama untuk mulai mengajar</p>
+                    <a class="link" href="{{ route('instruktur.create') }}">＋ Tambah Instruktur Pertama</a>
                 </section>
             @endif
 
-            <div class="footer-actions">
+            <div style="margin-top:22px;">
                 <a class="btn" href="{{ route('dashboard') }}">← Kembali ke Dashboard</a>
             </div>
         </div>
     </main>
 
-    <div id="confirmP" class="modal-backdrop">
+    <div id="confirm" class="modal-backdrop">
         <div class="modal">
-            <h4>Hapus Paket</h4>
-            <p id="confirmP-text" style="margin:0 0 12px;">Anda yakin ingin menghapus paket ini?</p>
-            <form id="confirmP-form" method="POST" action="">
+            <h4>Hapus Data</h4>
+            <p id="confirm-text" style="margin:0 0 12px;">Anda yakin ingin menghapus?</p>
+            <form id="confirm-form" method="POST" action="">
                 @csrf
                 @method('DELETE')
                 <div class="actions">
-                    <button type="button" class="btn" id="cancelP">Batal</button>
+                    <button type="button" class="btn" id="cancel">Batal</button>
                     <button type="submit" class="btn btn-primary">Ya, Hapus</button>
                 </div>
             </form>
@@ -127,19 +126,19 @@
     </div>
 
     <script>
-        const mP = document.getElementById('confirmP');
-        const fP = document.getElementById('confirmP-form');
-        const tP = document.getElementById('confirmP-text');
-        const cP = document.getElementById('cancelP');
+        const modal = document.getElementById('confirm');
+        const form = document.getElementById('confirm-form');
+        const text = document.getElementById('confirm-text');
+        const cancelBtn = document.getElementById('cancel');
         document.querySelectorAll('[data-delete]').forEach(btn=>{
             btn.addEventListener('click', ()=>{
-                fP.action = btn.dataset.delete;
-                tP.textContent = `Hapus paket "${btn.dataset.name}"?`;
-                mP.style.display = 'flex';
+                form.action = btn.dataset.delete;
+                text.textContent = `Hapus instruktur "${btn.dataset.name}"?`;
+                modal.style.display = 'flex';
             });
         });
-        cP.addEventListener('click', ()=>{ mP.style.display = 'none'; });
-        mP.addEventListener('click', (e)=>{ if(e.target===mP) mP.style.display='none'; });
+        cancelBtn.addEventListener('click', ()=>{ modal.style.display = 'none'; });
+        modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
     </script>
 </body>
 </html>
