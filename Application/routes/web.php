@@ -10,6 +10,7 @@ use App\Http\Controllers\InstrukturController;
 use App\Http\Controllers\MobilController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\RatingsController;
+use App\Http\Controllers\KursusProfileController;
 
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -62,3 +63,7 @@ Route::get('/pesanan', [OrdersController::class, 'index'])->name('orders.index')
 
 // Rating & Ulasan
 Route::get('/ulasan', [RatingsController::class, 'index'])->name('ulasan.index');
+
+// Profil Kursus
+Route::get('/profil', [KursusProfileController::class, 'show'])->name('profile.show');
+Route::put('/profil', [KursusProfileController::class, 'update'])->name('profile.update');

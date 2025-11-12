@@ -70,7 +70,14 @@ class PaketController extends Controller
         $paket->deskripsi = $validated['deskripsi'] ?? null;
         $paket->jenis_kendaraan = $validated['jenis_kendaraan'];
         $paket->id_kursus = $kursusId;
-        $paket->save();
+        try {
+            $paket->save();
+        } catch (\Throwable $e) {
+            report($e);
+            return back()->withErrors([
+                'general' => 'Server database sedang sibuk atau tidak dapat diakses. Silakan coba lagi beberapa saat.',
+            ])->withInput();
+        }
 
         return redirect()->route('paket.index')->with('success', 'Paket berhasil dibuat');
     }
@@ -102,7 +109,14 @@ class PaketController extends Controller
         $paket->durasi_jam = $validated['durasi_jam'];
         $paket->deskripsi = $validated['deskripsi'] ?? null;
         $paket->jenis_kendaraan = $validated['jenis_kendaraan'];
-        $paket->save();
+        try {
+            $paket->save();
+        } catch (\Throwable $e) {
+            report($e);
+            return back()->withErrors([
+                'general' => 'Server database sedang sibuk atau tidak dapat diakses. Silakan coba lagi beberapa saat.',
+            ])->withInput();
+        }
 
         return redirect()->route('paket.index')->with('success', 'Paket berhasil diperbarui');
     }

@@ -6,14 +6,14 @@
         </a>
     </div>
     <div class="right">
-        <a class="btn" href="{{ route('dashboard') }}">Dashboard</a>
-        <a class="btn" href="{{ route('orders.index') }}">Pesanan</a>
-        <a class="btn" href="{{ route('paket.index') }}">Paket</a>
-        <a class="btn" href="{{ route('instruktur.index') }}">Instruktur</a>
-        <a class="btn" href="{{ route('mobil.index') }}">Kendaraan</a>
-        @if(Route::has('ulasan.index'))
-        <a class="btn" href="{{ route('ulasan.index') }}">Ulasan</a>
-        @endif
+        @php
+            $kid = session('kursus_id');
+            $pf = null;
+            if ($kid) { $pf = \App\Models\Kursus::where('id_kursus', $kid)->value('foto_profil'); }
+        @endphp
+        <a href="{{ route('profile.show') }}" title="Profil" style="display:inline-flex;align-items:center;gap:10px;margin-right:12px;text-decoration:none">
+            <img src="{{ $pf ?: asset('images/logo.jpg') }}" alt="Profil" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.2)">
+        </a>
         <form method="POST" action="{{ route('logout') }}" style="margin:0">
             @csrf
             <button type="submit" class="btn btn-danger">Keluar</button>

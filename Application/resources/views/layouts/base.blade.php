@@ -18,19 +18,27 @@
         .btn-primary { background:#2962ff; border-color:#3d73ff; }
         .btn-primary:hover { background:#4174ff; }
         .btn-danger { background:#c73b2f; border-color:#d25a50; color:#fff; }
-        .container { max-width:1040px; margin:22px auto; padding:0 18px; }
+        .container { max-width:none; width:100%; margin:22px 18px; padding:0; }
         .card-shell { background:#121a22; border:1px solid #243243; border-radius:16px; padding:26px; box-shadow:0 10px 30px rgba(0,0,0,.35); }
         .panel { background:#121a22; border:1px solid #243243; border-radius:12px; padding:18px; }
         .title-wrap { text-align:center; margin-bottom:18px; }
         .title { margin:4px 0 6px; font-size:26px; color:#ffb255; }
         .subtitle { margin:0; color:#b9c3cd; }
-        
+        /* Sidebar */
+        .sidebar { position:fixed; top:60px; left:0; width:64px; bottom:0; background:#0c1218; border-right:1px solid #1f2a36; padding:12px 8px; display:flex; flex-direction:column; gap:8px; z-index:30; }
+        .sb-link { width:48px; height:48px; display:flex; align-items:center; justify-content:center; border-radius:12px; color:#cfe0ef; text-decoration:none; border:1px solid #233445; background:#121b25; transition:background .18s ease, border-color .18s ease, transform .06s ease; }
+        .sb-link:hover { background:#182332; border-color:#2a3d51; }
+        .sb-link.active { background:#23364a; border-color:#34506a; }
+        .sb-bottom { margin-top:auto; }
+        .has-sidebar .container { margin-left:88px; }
+    
     </style>
     @stack('styles')
 </head>
-<body>
+<body class="{{ empty($hideTopbar) ? 'has-sidebar' : '' }}">
 @if (empty($hideTopbar))
 @include('partials.topbar')
+@include('partials.sidebar')
 @endif
 <main class="container">
     @yield('content')
