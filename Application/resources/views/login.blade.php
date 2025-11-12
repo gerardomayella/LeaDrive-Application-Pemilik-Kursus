@@ -1,22 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - LeadDrive</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+@extends('layouts.base', ['title' => 'Login - LeadDrive', 'hideTopbar' => true])
+
+@push('styles')
     <style>
         * { box-sizing: border-box; }
-        body {
-            background-color: #1c1c1c;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+        body { background-color:#1c1c1c; }
+        .auth-shell { display:flex; justify-content:center; align-items:center; min-height: calc(100vh - 44px); }
         .login-container {
             background-color: #2c2c2c;
             padding: 2rem;
@@ -73,8 +61,10 @@
         .actions-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
         .remember { display: flex; align-items: center; gap: 0.5rem; }
     </style>
-</head>
-<body>
+@endpush
+
+@section('content')
+    <div class="auth-shell">
     <div class="login-container">
         <img src="{{ asset('images/logo.jpg') }}">
         <h1>Masuk ke LeadDrive</h1>
@@ -118,5 +108,5 @@
         </form>
         <p>Belum punya akun? <a href="{{ route('register.step1.show') }}">Daftar sekarang</a></p>
     </div>
-</body>
-</html>
+    </div>
+@endsection

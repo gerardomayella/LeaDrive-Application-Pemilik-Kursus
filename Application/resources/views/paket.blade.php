@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atur Paket Kursus - LeadDrive</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+@extends('layouts.base', ['title' => 'Atur Paket Kursus - LeadDrive'])
+
+@push('styles')
     <style>
-        body { margin:0; font-family: Arial, sans-serif; background:#0f141a; color:#e6e6e6; }
         .container { max-width:1040px; margin:24px auto; padding:0 18px; }
         .shell { background:#121a22; border:1px solid #243243; border-radius:16px; padding:28px; box-shadow:0 10px 30px rgba(0,0,0,.35); }
         .title-wrap { text-align:center; margin-bottom:22px; }
@@ -41,9 +36,10 @@
         .modal h4 { margin:0 0 10px; color:#ffb255; }
         .modal .actions { justify-content:flex-end; }
     </style>
-</head>
-<body>
-    <main class="container">
+@endpush
+
+@section('content')
+    <div class="container">
         <div class="shell">
             <div class="title-wrap">
                 <div class="icon">📦</div>
@@ -109,7 +105,7 @@
                 <a class="btn" href="{{ route('dashboard') }}">← Kembali ke Dashboard</a>
             </div>
         </div>
-    </main>
+    </div>
 
     <div id="confirmP" class="modal-backdrop">
         <div class="modal">
@@ -141,5 +137,4 @@
         cP.addEventListener('click', ()=>{ mP.style.display = 'none'; });
         mP.addEventListener('click', (e)=>{ if(e.target===mP) mP.style.display='none'; });
     </script>
-</body>
-</html>
+@endsection

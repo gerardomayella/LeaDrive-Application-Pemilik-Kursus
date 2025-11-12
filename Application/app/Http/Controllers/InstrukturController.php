@@ -102,7 +102,14 @@ class InstrukturController extends Controller
                 ])->withInput();
             }
         }
-        $instruktur->save();
+        try {
+            $instruktur->save();
+        } catch (\Throwable $e) {
+            report($e);
+            return back()->withErrors([
+                'general' => 'Server database sedang sibuk atau tidak dapat diakses. Silakan coba lagi beberapa saat.',
+            ])->withInput();
+        }
 
         return redirect()->route('instruktur.index')->with('success', 'Instruktur berhasil ditambahkan');
     }
@@ -159,7 +166,14 @@ class InstrukturController extends Controller
             }
         }
 
-        $instruktur->save();
+        try {
+            $instruktur->save();
+        } catch (\Throwable $e) {
+            report($e);
+            return back()->withErrors([
+                'general' => 'Server database sedang sibuk atau tidak dapat diakses. Silakan coba lagi beberapa saat.',
+            ])->withInput();
+        }
         return redirect()->route('instruktur.index')->with('success', 'Instruktur berhasil diperbarui');
     }
 

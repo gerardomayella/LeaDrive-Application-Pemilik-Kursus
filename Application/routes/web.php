@@ -9,6 +9,7 @@ use App\Http\Controllers\PaketController;
 use App\Http\Controllers\InstrukturController;
 use App\Http\Controllers\MobilController;
 use App\Http\Controllers\OrdersController;
+use App\Http\Controllers\RatingsController;
 
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -58,3 +59,6 @@ Route::delete('/mobil/{id}', [MobilController::class, 'destroy'])->name('mobil.d
 
 // Pesanan Kursus
 Route::get('/pesanan', [OrdersController::class, 'index'])->name('orders.index');
+
+// Rating & Ulasan
+Route::get('/ulasan', [RatingsController::class, 'index'])->name('ulasan.index');

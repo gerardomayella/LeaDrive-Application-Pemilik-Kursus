@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrasi - Data Kursus | LeadDrive</title>
+@extends('layouts.base', ['title' => 'Registrasi - Data Kursus | LeadDrive', 'hideTopbar' => true])
+
+@push('styles')
     <style>
         * {
             margin: 0;
@@ -11,13 +8,8 @@
             box-sizing: border-box;
         }
         
-        body {
-            background-color: #1c1c1c;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            min-height: 100vh;
-            padding: 2rem 1rem;
-        }
+        body { background-color:#1c1c1c; color:#fff; }
+        .auth-shell { min-height: calc(100vh - 44px); padding: 2rem 1rem; }
 
         .container {
             max-width: 1000px;
@@ -315,8 +307,10 @@
             }
         }
     </style>
-</head>
-<body>
+@endpush
+
+@section('content')
+    <div class="auth-shell">
     <div class="container">
         <!-- Progress Indicator -->
         <div class="progress-container">
@@ -389,7 +383,6 @@
             </form>
         </div>
     </div>
-
-</body>
-</html>
+    </div>
+@endsection
 

@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Pemilik Kursus - LeadDrive</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+@extends('layouts.base', ['title' => 'Dashboard Pemilik Kursus - LeadDrive'])
+
+@push('styles')
     <style>
         * { box-sizing: border-box; }
         body { margin:0; font-family: Arial, sans-serif; background:#0f141a; color:#e6e6e6; }
@@ -54,23 +50,10 @@
             .two-col { grid-template-columns:1fr; }
         }
     </style>
-</head>
-<body>
-    <header class="topbar">
-        <div class="brand">
-            <img src="{{ asset('images/logo.jpg') }}" alt="LeadDrive">
-            LeadDrive
-        </div>
-        <div class="right">
-            <img class="avatar" src="{{ $kursus && $kursus->foto_logo ? asset('storage/'.$kursus->foto_logo) : asset('images/logo.jpg') }}" alt="Profil Kursus">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="btn btn-danger">Keluar</button>
-            </form>
-        </div>
-    </header>
+@endpush
 
-    <main class="container">
+@section('content')
+    <div class="container">
         <div class="card-shell">
             <div class="title-wrap">
                 <div style="font-size:28px">👤</div>
@@ -102,7 +85,7 @@
                         <a href="{{ route('paket.index') }}">Atur Paket Kursus</a>
                         <a href="{{ route('instruktur.index') }}">Kelola Instruktur</a>
                         <a href="{{ route('orders.index') }}">Pesanan Kursus</a>
-                        <div class="item-disabled" title="Lengkapi profil terlebih dahulu">Rating & Ulasan</div>
+                        <a href="{{ route('ulasan.index') }}">Rating & Ulasan</a>
                         <a href="{{ route('mobil.index') }}">Kelola Kendaraan</a>
                     </div>
                 </div>
@@ -125,13 +108,6 @@
                 </div>
             </section>
 
-            <div class="footer">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="btn btn-danger">Keluar</button>
-                </form>
-            </div>
+            <div class="footer"></div>
         </div>
-    </main>
-</body>
-</html>
+@endsection

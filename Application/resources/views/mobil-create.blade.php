@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Kendaraan - LeadDrive</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+@extends('layouts.base', ['title' => 'Tambah Kendaraan - LeadDrive'])
+
+@push('styles')
     <style>
-        body { margin:0; font-family: Arial, sans-serif; background:#0f141a; color:#e6e6e6; }
         .container { max-width:840px; margin:24px auto; padding:0 18px; }
         .shell { background:#121a22; border:1px solid #243243; border-radius:16px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,.35); }
         .title { margin:0 0 18px; color:#ffb255; font-size:22px; font-weight:800; }
@@ -26,8 +21,9 @@
         .opt.active { border-color:#ff9f33; background:#1a2430; }
         .help { color:#9fb0bf; font-size:12px; }
     </style>
-</head>
-<body>
+@endpush
+
+@section('content')
     <main class="container">
         <div class="shell">
             <h1 class="title">Tambah Kendaraan</h1>
@@ -83,5 +79,4 @@
         opts.forEach(o=>o.addEventListener('click',()=>{ hidden.value=o.dataset.value; refresh(); }));
         refresh();
     </script>
-</body>
-</html>
+@endsection
