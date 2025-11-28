@@ -75,7 +75,7 @@ class InstrukturController extends Controller
         $instruktur->status_aktif = $request->boolean('status_aktif', true);
         $instruktur->id_kursus = $kursusId;
 
-        // Upload foto profil jika ada
+        // Upload foto profil (ops)
         if ($request->hasFile('foto_profil')) {
             $supabase = new SupabaseService();
             $url = $supabase->uploadInstrukturDocument($request->file('foto_profil'), 'fotoinstruktur');
@@ -89,7 +89,7 @@ class InstrukturController extends Controller
             }
         }
 
-        // Upload sertifikat jika ada
+        // Upload sertifikat (ops)
         if ($request->hasFile('sertifikat')) {
             $supabase = isset($supabase) ? $supabase : new SupabaseService();
             $sertifUrl = $supabase->uploadInstrukturDocument($request->file('sertifikat'), 'sertifikat');

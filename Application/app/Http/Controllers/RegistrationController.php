@@ -87,10 +87,18 @@ class RegistrationController extends Controller
         $validated = $request->validate([
             'nama_kursus' => 'required|string|max:255',
             'lokasi' => 'required|string',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
             'jam_buka' => 'required|date_format:H:i',
             'jam_tutup' => 'required|date_format:H:i|after:jam_buka',
         ], [
             'jam_tutup.after' => 'Jam tutup harus setelah jam buka.',
+            'latitude.required' => 'Silakan pilih lokasi di peta.',
+            'longitude.required' => 'Silakan pilih lokasi di peta.',
+            'latitude.numeric' => 'Koordinat lokasi tidak valid.',
+            'longitude.numeric' => 'Koordinat lokasi tidak valid.',
+            'latitude.between' => 'Koordinat lintang harus antara -90 dan 90 derajat.',
+            'longitude.between' => 'Koordinat bujur harus antara -180 dan 180 derajat.'
         ]);
 
         // Store step 2 data in session
@@ -230,6 +238,8 @@ class RegistrationController extends Controller
                 'waktu' => now(),
                 'nama_kursus' => $step2['nama_kursus'],
                 'lokasi' => $step2['lokasi'],
+                'latitude' => $step2['latitude'],
+                'longitude' => $step2['longitude'],
                 'jam_buka' => $step2['jam_buka'],
                 'jam_tutup' => $step2['jam_tutup'],
                 // field baru sesuai skema

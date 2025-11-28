@@ -78,6 +78,49 @@
             margin-bottom: 2rem;
         }
 
+        #map {
+            height: 300px;
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #444;
+        }
+
+        .map-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .map-search {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            width: calc(100% - 40px);
+            max-width: 400px;
+        }
+
+        .map-search input {
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .location-coordinates {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .location-coordinates .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -309,6 +352,131 @@
     </style>
 @endpush
 
+@push('scripts')
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA51CWc7oYPE4uj4r6UsNaWOKutp_e85hY&libraries=places&callback=Function.prototype" async defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize map
+            const map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: -6.2088, lng: 106.8456 }, // Default to Jakarta
+                zoom: 12
+            });
+
+            // Initialize search box
+            const searchBox = new google.maps.places.SearchBox(document.getElementById('search-box'));
+            map.controls[google.maps.ControlPosition.TOP_LEFT].push(document.getElementById('search-box'));
+
+            // Initialize marker
+            let marker = new google.maps.Marker({
+                map: map,
+                draggable: true,
+                animation: google.maps.Animation.DROP,
+                position: { lat: -6.2088, lng: 106.8456 }
+            });
+
+            // Update form fields when marker is dragged
+            marker.addListener('dragend', function() {
+                updateLocationFields(marker.getPosition());
+            });
+
+            // Update marker position when a place is selected from search
+            map.addListener('bounds_changed', function() {
+                searchBox.setBounds(map.getBounds());
+            });
+
+            // Listen for the event fired when the user selects a prediction and retrieve more details
+            searchBox.addListener('places_changed', function() {
+                const places = searchBox.getPlaces();
+
+                if (places.length === 0) {
+                    return;
+                }
+
+                // Get the first place from the search results
+                const place = places[0];
+
+                if (!place.geometry || !place.geometry.location) {
+                    console.log("Returned place contains no geometry");
+                    return;
+                }
+
+                // Update the map and marker
+                if (place.geometry.viewport) {
+                    map.fitBounds(place.geometry.viewport);
+                } else {
+                    map.setCenter(place.geometry.location);
+                    map.setZoom(17);
+                }
+                
+                marker.setPosition(place.geometry.location);
+                updateLocationFields(place.geometry.location);
+                
+                // Update address field
+                document.getElementById('lokasi').value = place.formatted_address || '';
+            });
+
+            // Update location on map click
+            map.addListener('click', function(event) {
+                marker.setPosition(event.latLng);
+                updateLocationFields(event.latLng);
+                
+                // Reverse geocode to get address
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ location: event.latLng }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        document.getElementById('lokasi').value = results[0].formatted_address;
+                    }
+                });
+            });
+
+            // Update form fields with coordinates
+            function updateLocationFields(latLng) {
+                document.getElementById('latitude').value = latLng.lat();
+                document.getElementById('longitude').value = latLng.lng();
+                
+                // If address field is empty, try to get it from reverse geocoding
+                if (!document.getElementById('lokasi').value) {
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({ location: latLng }, (results, status) => {
+                        if (status === 'OK' && results[0]) {
+                            document.getElementById('lokasi').value = results[0].formatted_address;
+                        }
+                    });
+                }
+            }
+            
+            // Initialize with current location if available
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        
+                        marker.setPosition(pos);
+                        map.setCenter(pos);
+                        map.setZoom(15);
+                        updateLocationFields(pos);
+                        
+                        // Get address from coordinates
+                        const geocoder = new google.maps.Geocoder();
+                        geocoder.geocode({ location: pos }, (results, status) => {
+                            if (status === 'OK' && results[0]) {
+                                document.getElementById('lokasi').value = results[0].formatted_address;
+                            }
+                        });
+                    },
+                    () => {
+                        // Handle location access denied
+                        console.log('Geolocation access denied');
+                    }
+                );
+            }
+        });
+    </script>
+@endpush
+
 @section('content')
     <div class="auth-shell">
     <div class="container">
@@ -352,11 +520,30 @@
 
                 <div class="form-group">
                     <label for="lokasi">Alamat Lengkap <span class="required">*</span></label>
-                    <textarea id="lokasi" name="lokasi" required>{{ old('lokasi') }}</textarea>
-                    @error('lokasi')
-                        <div class="error-message">{{ $message }}</div>
-                    @enderror
+                    <div class="map-container">
+                        <div class="map-search">
+                            <input type="text" id="search-box" placeholder="Cari lokasi...">
+                        </div>
+                        <div id="map"></div>
+                    </div>
+                    <div class="location-coordinates">
+                        <div class="form-group">
+                            <label for="latitude">Latitude <span class="required">*</span></label>
+                            <input type="text" id="latitude" name="latitude" required readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="longitude">Longitude <span class="required">*</span></label>
+                            <input type="text" id="longitude" name="longitude" required readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="lokasi">Alamat Lengkap <span class="required">*</span></label>
+                        <textarea id="lokasi" name="lokasi" required>{{ old('lokasi') }}</textarea>
+                    </div>
                 </div>
+                @error('lokasi')
+                    <div class="error-message">{{ $message }}</div>
+                @enderror
 
                 <div class="time-row">
                     <div class="form-group">
