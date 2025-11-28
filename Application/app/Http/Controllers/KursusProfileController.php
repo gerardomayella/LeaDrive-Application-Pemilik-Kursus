@@ -60,6 +60,11 @@ class KursusProfileController extends Controller
 
         try {
             $kursus->save();
+
+            $request->session()->put('kursus_nama', $kursus->nama_kursus ?? 'Pemilik Kursus');
+            if ($kursus->foto_profil) {
+                $request->session()->put('kursus_foto', $kursus->foto_profil);
+            }
         } catch (\Throwable $e) {
             report($e);
             return back()->withErrors([

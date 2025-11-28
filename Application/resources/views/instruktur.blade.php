@@ -1,139 +1,440 @@
 @extends('layouts.base', ['title' => 'Kelola Instruktur - LeadDrive'])
 
 @push('styles')
-    <style>
-        .container { max-width:1040px; margin:24px auto; padding:0 18px; }
-        .shell { background:#121a22; border:1px solid #243243; border-radius:16px; padding:28px; box-shadow:0 10px 30px rgba(0,0,0,.35); }
-        .title-wrap { text-align:center; margin-bottom:22px; }
-        .title { margin:6px 0 4px; font-size:26px; color:#ffb255; font-weight:800; }
-        .subtitle { margin:0; color:#b9c3cd; }
-        .actions { display:flex; align-items:center; gap:10px; margin:10px 0 22px; }
-        .link { display:inline-flex; align-items:center; gap:8px; color:#ffcc8a; text-decoration:none; font-weight:700; }
-        .link:hover { text-decoration:underline; }
-        .empty { border:1px solid #3a4a5a; border-radius:12px; padding:38px 16px; text-align:center; background:#0f1923; }
-        .empty .icon { font-size:40px; margin-bottom:12px; }
-        .empty .title { color:#d7dee6; font-size:18px; margin:0 0 6px; }
-        .empty .desc { color:#9fb0bf; margin:0 0 12px; }
-        .btn { display:inline-flex; align-items:center; gap:8px; border:0; cursor:pointer; background:#1b2733; color:#e6e6e6; padding:10px 14px; border-radius:10px; border:1px solid #263646; text-decoration:none; font-weight:600; }
-        .btn:hover { background:#213142; }
-        .item { background:#0f1923; border:1px solid #2b3a49; border-radius:10px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; }
-        .name { font-weight:800; color:#ffcc8a }
-        .muted { opacity:.85 }
-        .row-actions { display:flex; gap:8px; align-items:center; }
-        .pill { padding:6px 10px; border-radius:8px; border:1px solid #2b3a49; background:#1a2430; color:#e6e6e6; text-decoration:none; font-size:13px; }
-        .pill:hover { background:#203041; }
-        .pill-danger { background:#8b2f28; border-color:#b9453c; color:#fff; }
-        .search { display:flex; gap:8px; }
-        .input { background:#0f1923; color:#e6e6e6; border:1px solid #2b3a49; border-radius:10px; padding:10px 12px; outline:none; }
-        .alert { background:#10311f; border:1px solid #275a3c; color:#b9f5c6; padding:10px 12px; border-radius:10px; margin-bottom:12px; }
-        .pagination { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
-        .pagination a, .pagination span { padding:6px 10px; border:1px solid #2b3a49; border-radius:8px; text-decoration:none; color:#e6e6e6; }
-        .pagination .active span { background:#ff8a00; color:#111; border-color:#ff9f33; }
-        .sortbar { display:flex; align-items:center; gap:8px; }
-        .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; padding:20px; }
-        .modal { background:#121a22; border:1px solid #243243; border-radius:12px; padding:18px; max-width:420px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,.45); }
-        .modal h4 { margin:0 0 10px; color:#ffb255; }
-        .modal .actions { justify-content:flex-end; }
-    </style>
+<style>
+    .page-container {
+        padding: 2rem 1rem;
+        min-height: calc(100vh - 70px);
+        background: radial-gradient(circle at top right, #2a1b0a 0%, #0f141a 60%);
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        background: rgba(30, 37, 48, 0.6);
+        backdrop-filter: blur(20px);
+        padding: 1.5rem;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .title-section h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+        background: linear-gradient(90deg, #fff, #ffb255);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .title-section p {
+        color: #94a3b8;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .search-bar {
+        display: flex;
+        gap: 0.75rem;
+        background: rgba(15, 20, 26, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        flex: 1;
+        max-width: 400px;
+        transition: all 0.3s ease;
+    }
+
+    .search-bar:focus-within {
+        border-color: #ff7f00;
+        box-shadow: 0 0 0 3px rgba(255, 127, 0, 0.1);
+        background: rgba(15, 20, 26, 0.8);
+    }
+
+    .search-input {
+        background: transparent;
+        border: none;
+        color: #ffffff;
+        width: 100%;
+        outline: none;
+        font-size: 0.95rem;
+    }
+
+    .search-input::placeholder {
+        color: #64748b;
+    }
+
+    .btn-add {
+        background: linear-gradient(135deg, #ff7f00 0%, #ff5500 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(255, 127, 0, 0.25);
+        border: none;
+    }
+
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 127, 0, 0.35);
+    }
+
+    .instructor-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+
+    .instructor-card {
+        background: rgba(30, 37, 48, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        backdrop-filter: blur(20px);
+        animation: fadeIn 0.5s ease-out forwards;
+        opacity: 0;
+    }
+
+    .instructor-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 127, 0, 0.3);
+        background: rgba(30, 37, 48, 0.8);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .instructor-header {
+        padding: 1.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.02);
+        position: relative;
+    }
+
+    .instructor-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: #ff7f00;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+    }
+
+    .instructor-info h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 0.25rem;
+    }
+
+    .instructor-info p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #94a3b8;
+    }
+
+    .status-badge {
+        position: absolute;
+        top: 1.25rem;
+        right: 1.25rem;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .status-active {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .status-inactive {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .instructor-details {
+        padding: 1.75rem;
+        flex: 1;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        color: #cbd5e1;
+        font-size: 0.95rem;
+    }
+
+    .detail-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .detail-item i {
+        width: 24px;
+        text-align: center;
+        color: #ff7f00;
+        opacity: 0.8;
+        font-size: 1.1rem;
+    }
+
+    .instructor-actions {
+        padding: 1.25rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        gap: 1rem;
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-action {
+        flex: 1;
+        padding: 0.75rem;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.03);
+        color: #cbd5e1;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-action:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-action.danger:hover {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 5rem 2rem;
+        background: rgba(30, 37, 48, 0.6);
+        border: 1px dashed rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        backdrop-filter: blur(20px);
+    }
+    
+    /* Modal Styles */
+    .modal-backdrop {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+        display: none; align-items: center; justify-content: center;
+        z-index: 1000; backdrop-filter: blur(8px);
+        opacity: 0; transition: opacity 0.3s ease;
+    }
+    
+    .modal-backdrop.active {
+        opacity: 1;
+    }
+
+    .modal-content {
+        background: #1e2530;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        transform: scale(0.95);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-backdrop.active .modal-content {
+        transform: scale(1);
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 1rem;
+    }
+
+    .modal-text {
+        color: #94a3b8;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+</style>
 @endpush
 
 @section('content')
-    <div class="container">
-        <div class="shell">
-            <div class="title-wrap">
-                <div class="icon">👨‍🏫</div>
-                <h1 class="title">Kelola Instruktur</h1>
-                <p class="subtitle">Kelola data instruktur yang terlibat dalam kursus mengemudi</p>
+<div class="page-container">
+    <div class="container mx-auto">
+        <div class="page-header">
+            <div class="title-section">
+                <h1>Kelola Instruktur</h1>
+                <p>Tim pengajar kursus Anda</p>
             </div>
-
-            @if(session('success'))
-                <div class="alert">{{ session('success') }}</div>
-            @endif
-
-            <div class="actions" style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
-                <form method="GET" class="search" action="{{ route('instruktur.index') }}">
-                    <input class="input" type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari nama, email, atau SIM...">
-                    <button class="btn" type="submit">Cari</button>
+            <div class="flex gap-4 items-center flex-wrap" style="flex: 1; justify-content: flex-end;">
+                <form method="GET" action="{{ route('instruktur.index') }}" class="search-bar">
+                    <i class="fas fa-search" style="color: #64748b; padding-top: 2px;"></i>
+                    <input class="search-input" type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari nama atau email...">
                 </form>
-                <div class="sortbar">
-                    @php
-                        $dirToggle = ($dir ?? 'desc') === 'asc' ? 'desc' : 'asc';
-                        function sortLink($key, $label, $q, $sort, $dir){
-                            $params = ['q'=>$q,'sort'=>$key,'dir'=>($sort===$key && $dir==='asc')?'desc':'asc'];
-                            $url = route('instruktur.index',$params);
-                            $arrow = $sort===$key ? ($dir==='asc'?'↑':'↓') : '';
-                            return '<a class="pill" href="'.$url.'">'.$label.' '.$arrow.'</a>';
-                        }
-                    @endphp
-                    {!! sortLink('terbaru','Terbaru',$q??'', $sort??'terbaru', $dir??'desc') !!}
-                    {!! sortLink('nama','Nama',$q??'', $sort??'terbaru', $dir??'desc') !!}
-                    {!! sortLink('status','Status',$q??'', $sort??'terbaru', $dir??'desc') !!}
-                </div>
-                <a class="link" href="{{ route('instruktur.create') }}">＋ Tambah Instruktur Baru</a>
+                <a href="{{ route('instruktur.create') }}" class="btn-add">
+                    <i class="fas fa-plus"></i> Tambah Instruktur
+                </a>
             </div>
+        </div>
 
-            @if(isset($instrukturs) && $instrukturs->count())
-                <div style="display:grid; gap:12px;">
-                    @foreach($instrukturs as $i)
-                        <div class="item">
-                            <div>
-                                <div class="name">{{ $i->nama }}</div>
-                                <div class="muted">{{ $i->email }} @if($i->nomor_sim) · SIM: {{ $i->nomor_sim }} @endif</div>
-                            </div>
-                            <div class="row-actions">
-                                <span class="muted">{{ $i->status_aktif ? 'Aktif' : 'Non-aktif' }}</span>
-                                <a class="pill" href="{{ route('instruktur.edit',$i->id_instruktur) }}">Edit</a>
-                                <button class="pill pill-danger" data-delete="{{ route('instruktur.destroy',$i->id_instruktur) }}" data-name="{{ $i->nama }}">Hapus</button>
-                            </div>
+        @if(session('success'))
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #34d399; padding: 1rem; border-radius: 12px; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem;">
+                <i class="fas fa-check-circle text-xl"></i> {{ session('success') }}
+            </div>
+        @endif
+
+        <div class="instructor-grid">
+            @forelse($instrukturs as $i)
+                <div class="instructor-card" style="animation-delay: {{ $loop->index * 0.1 }}s">
+                    <div class="status-badge {{ $i->status_aktif ? 'status-active' : 'status-inactive' }}">
+                        {{ $i->status_aktif ? 'Aktif' : 'Non-aktif' }}
+                    </div>
+                    
+                    <div class="instructor-header">
+                        <div class="instructor-avatar">
+                            @if($i->foto)
+                                <img src="{{ asset($i->foto) }}" alt="{{ $i->nama }}" style="width:100%; height:100%; object-fit:cover;">
+                            @else
+                                {{ substr($i->nama, 0, 1) }}
+                            @endif
                         </div>
-                    @endforeach
-                </div>
-                <div class="pagination">
-                    {{ $instrukturs->links() }}
-                </div>
-            @else
-                <section class="empty">
-                    <div class="icon">👨‍🏫</div>
-                    <h3 class="title">Belum Ada Instruktur</h3>
-                    <p class="desc">Tambahkan instruktur pertama untuk mulai mengajar</p>
-                    <a class="link" href="{{ route('instruktur.create') }}">＋ Tambah Instruktur Pertama</a>
-                </section>
-            @endif
+                        <div class="instructor-info">
+                            <h3>{{ $i->nama }}</h3>
+                            <p>Instruktur Profesional</p>
+                        </div>
+                    </div>
 
-            <div style="margin-top:22px;">
-                <a class="btn" href="{{ route('dashboard') }}">← Kembali ke Dashboard</a>
-            </div>
+                    <div class="instructor-details">
+                        <div class="detail-item">
+                            <i class="fas fa-envelope"></i>
+                            <span class="truncate">{{ $i->email }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-phone"></i>
+                            <span>{{ $i->no_telepon ?? '-' }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-id-card"></i>
+                            <span>SIM: {{ $i->nomor_sim ?? 'Belum ada' }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Bergabung: {{ $i->created_at ? $i->created_at->format('d M Y') : '-' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="instructor-actions">
+                        <a href="{{ route('instruktur.edit', $i->id_instruktur) }}" class="btn-action">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <button class="btn-action danger" onclick="confirmDelete('{{ route('instruktur.destroy', $i->id_instruktur) }}', '{{ $i->nama }}')">
+                            <i class="fas fa-trash-alt"></i> Hapus
+                        </button>
+                    </div>
+                </div>
+            @empty
+                <div class="empty-state">
+                    <div style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.5;">👨‍🏫</div>
+                    <h3 style="font-size: 1.5rem; font-weight: 700; color: #ffffff; margin-bottom: 0.5rem;">Belum Ada Instruktur</h3>
+                    <p style="color: #94a3b8; margin-bottom: 2rem;">Tambahkan instruktur untuk mulai mengelola jadwal kursus.</p>
+                    <a href="{{ route('instruktur.create') }}" class="btn-add">
+                        <i class="fas fa-plus"></i> Tambah Instruktur Pertama
+                    </a>
+                </div>
+            @endforelse
+        </div>
+
+        <div class="mt-8">
+            {{ $instrukturs->links() }}
         </div>
     </div>
+</div>
 
-    <div id="confirm" class="modal-backdrop">
-        <div class="modal">
-            <h4>Hapus Data</h4>
-            <p id="confirm-text" style="margin:0 0 12px;">Anda yakin ingin menghapus?</p>
-            <form id="confirm-form" method="POST" action="">
-                @csrf
-                @method('DELETE')
-                <div class="actions">
-                    <button type="button" class="btn" id="cancel">Batal</button>
-                    <button type="submit" class="btn btn-primary">Ya, Hapus</button>
-                </div>
-            </form>
-        </div>
+<!-- Delete Modal -->
+<div id="deleteModal" class="modal-backdrop">
+    <div class="modal-content">
+        <h3 class="modal-title">Hapus Instruktur?</h3>
+        <p class="modal-text" id="deleteMessage">Apakah Anda yakin ingin menghapus data ini?</p>
+        
+        <form id="deleteForm" method="POST" action="" class="modal-actions">
+            @csrf
+            @method('DELETE')
+            <button type="button" class="btn-action" onclick="closeModal()" style="width: auto; padding: 0.75rem 1.5rem;">Batal</button>
+            <button type="submit" class="btn-action danger" style="width: auto; padding: 0.75rem 1.5rem; background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3);">Hapus</button>
+        </form>
     </div>
+</div>
 
-    <script>
-        const modal = document.getElementById('confirm');
-        const form = document.getElementById('confirm-form');
-        const text = document.getElementById('confirm-text');
-        const cancelBtn = document.getElementById('cancel');
-        document.querySelectorAll('[data-delete]').forEach(btn=>{
-            btn.addEventListener('click', ()=>{
-                form.action = btn.dataset.delete;
-                text.textContent = `Hapus instruktur "${btn.dataset.name}"?`;
-                modal.style.display = 'flex';
-            });
-        });
-        cancelBtn.addEventListener('click', ()=>{ modal.style.display = 'none'; });
-        modal.addEventListener('click', (e)=>{ if(e.target===modal) modal.style.display='none'; });
-    </script>
+@push('scripts')
+<script>
+    const modal = document.getElementById('deleteModal');
+    const deleteForm = document.getElementById('deleteForm');
+    const deleteMessage = document.getElementById('deleteMessage');
+
+    function confirmDelete(url, name) {
+        deleteForm.action = url;
+        deleteMessage.textContent = `Hapus instruktur "${name}"? Data yang dihapus tidak dapat dikembalikan.`;
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('active'), 10);
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+        setTimeout(() => modal.style.display = 'none', 300);
+    }
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+</script>
+@endpush
+
 @endsection

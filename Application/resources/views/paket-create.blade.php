@@ -1,94 +1,285 @@
 @extends('layouts.base', ['title' => 'Tambah Paket Baru - LeadDrive'])
 
 @push('styles')
-    <style>
-        .container { max-width:840px; margin:24px auto; padding:0 18px; }
-        .shell { background:#121a22; border:1px solid #243243; border-radius:16px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,.35); }
-        .title { margin:0 0 18px; color:#ffb255; font-size:22px; font-weight:800; }
-        .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-        .field { display:flex; flex-direction:column; gap:8px; }
-        .label { font-weight:700; color:#d7dee6; }
-        input[type="text"], input[type="number"], textarea { background:#0f1923; color:#e6e6e6; border:1px solid #2b3a49; border-radius:10px; padding:12px 12px; outline:none; }
-        textarea { min-height:120px; resize:vertical; }
-        .actions { display:flex; justify-content:space-between; margin-top:18px; }
-        .btn { display:inline-flex; align-items:center; gap:8px; border:0; cursor:pointer; background:#1b2733; color:#e6e6e6; padding:10px 14px; border-radius:10px; border:1px solid #263646; text-decoration:none; font-weight:600; }
-        .btn:hover { background:#213142; }
-        .btn-primary { background:#ff8a00; color:#111; border-color:#ff9f33; }
-        .btn-primary:hover { background:#ffa640; }
-        @media (max-width: 760px) { .grid { grid-template-columns:1fr; } }
-        .toggle { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:6px; }
-        .opt { background:#0f1923; border:1px solid #2b3a49; border-radius:10px; padding:12px; cursor:pointer; display:flex; align-items:center; gap:8px; justify-content:center; font-weight:700; }
-        .opt.active { border-color:#ff9f33; background:#1a2430; }
-    </style>
+<style>
+    .page-container {
+        padding: 2rem 1rem;
+        min-height: calc(100vh - 70px);
+        background: radial-gradient(circle at top right, #2a1b0a 0%, #0f141a 60%);
+        display: flex;
+        justify-content: center;
+    }
+
+    .form-card {
+        background: rgba(30, 37, 48, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        padding: 2.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        max-width: 800px;
+        animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-header {
+        margin-bottom: 2.5rem;
+        text-align: center;
+    }
+
+    .form-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(90deg, #fff, #ffb255);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .form-subtitle {
+        color: #94a3b8;
+        font-size: 1rem;
+    }
+
+    .section {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        color: #ff7f00;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #cbd5e1;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(15, 20, 26, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: #ffffff;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        outline: none;
+    }
+
+    .form-control:focus {
+        border-color: #ff7f00;
+        background: rgba(15, 20, 26, 0.8);
+        box-shadow: 0 0 0 4px rgba(255, 127, 0, 0.1);
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .toggle-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        background: rgba(15, 20, 26, 0.3);
+        padding: 0.5rem;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-option {
+        padding: 12px;
+        text-align: center;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #94a3b8;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .toggle-option:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: #cbd5e1;
+    }
+
+    .toggle-option.active {
+        background: rgba(255, 127, 0, 0.15);
+        color: #ff7f00;
+        border: 1px solid rgba(255, 127, 0, 0.3);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2.5rem;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 14px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        font-size: 1rem;
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        color: #cbd5e1;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #ff7f00 0%, #ff5500 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(255, 127, 0, 0.25);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 127, 0, 0.35);
+    }
+
+    @media (max-width: 768px) {
+        .grid-2 { grid-template-columns: 1fr; }
+        .form-card { padding: 1.5rem; }
+    }
+</style>
 @endpush
 
 @section('content')
-    <main class="container">
-        <div class="shell">
-            <h1 class="title">Tambah Paket Baru</h1>
-
-            @if ($errors->any())
-                <div style="background:#3a260d; border:1px solid #6a4a1d; color:#ffd7a3; padding:12px; border-radius:10px; margin-bottom:12px;">
-                    <ul style="margin:0; padding-left:18px;">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('paket.store') }}">
-                @csrf
-
-                <div class="field">
-                    <label class="label">Nama Paket *</label>
-                    <input type="text" name="nama_paket" placeholder="Contoh: Paket Reguler, Paket Intensif" value="{{ old('nama_paket') }}" required>
-                </div>
-
-                <div class="grid" style="margin-top:12px;">
-                    <div class="field">
-                        <label class="label">Harga (Rp) *</label>
-                        <input type="number" name="harga" min="0" step="1000" value="{{ old('harga') }}" required>
-                    </div>
-                    <div class="field">
-                        <label class="label">Durasi Total (Jam) *</label>
-                        <input type="number" name="durasi_jam" min="1" step="1" value="{{ old('durasi_jam') }}" required>
-                    </div>
-                </div>
-
-                <div class="field" style="margin-top:12px;">
-                    <label class="label">Jenis Kendaraan *</label>
-                    <input type="hidden" name="jenis_kendaraan" id="jenis_kendaraan" value="{{ old('jenis_kendaraan','manual') }}">
-                    <div class="toggle">
-                        <div class="opt" data-value="manual">🚗 Mobil Manual</div>
-                        <div class="opt" data-value="matic">🚘 Mobil Matic</div>
-                    </div>
-                </div>
-
-                <div class="field" style="margin-top:12px;">
-                    <label class="label">Deskripsi</label>
-                    <textarea name="deskripsi" placeholder="Jelaskan detail paket, fasilitas, dan keunggulan...">{{ old('deskripsi') }}</textarea>
-                </div>
-
-                <div class="actions">
-                    <a class="btn" href="{{ route('paket.index') }}">Batal</a>
-                    <button class="btn btn-primary" type="submit">Simpan Paket</button>
-                </div>
-            </form>
+<div class="page-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1 class="form-title">Tambah Paket Baru</h1>
+            <p class="form-subtitle">Buat penawaran paket kursus yang menarik</p>
         </div>
-    </main>
-    <script>
-        (function(){
-            const hidden = document.getElementById('jenis_kendaraan');
-            const opts = document.querySelectorAll('.opt');
-            function sync(){
-                opts.forEach(o=>{
-                    if(o.getAttribute('data-value')===hidden.value){ o.classList.add('active'); }
-                    else { o.classList.remove('active'); }
-                });
+
+        @if ($errors->any())
+            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                <ul style="margin:0; padding-left:1.25rem;">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('paket.store') }}">
+            @csrf
+
+            <div class="section">
+                <h3 class="section-title"><i class="fas fa-box-open"></i> Detail Paket</h3>
+                
+                <div class="form-group">
+                    <label>Nama Paket *</label>
+                    <input type="text" name="nama_paket" value="{{ old('nama_paket') }}" class="form-control" required placeholder="Contoh: Paket Reguler, Paket Intensif">
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Harga (Rp) *</label>
+                        <input type="number" name="harga" min="0" step="1000" value="{{ old('harga') }}" class="form-control" required placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Durasi Total (Jam) *</label>
+                        <input type="number" name="durasi_jam" min="1" step="1" value="{{ old('durasi_jam') }}" class="form-control" required placeholder="10">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>Jenis Kendaraan</label>
+                    <input type="hidden" name="jenis_kendaraan" id="jenis_kendaraan" value="{{ old('jenis_kendaraan','manual') }}">
+                    <div class="toggle-group">
+                        <div class="toggle-option" data-value="manual">
+                            <i class="fas fa-cog"></i> Mobil Manual
+                        </div>
+                        <div class="toggle-option" data-value="matic">
+                            <i class="fas fa-bolt"></i> Mobil Matic
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Deskripsi</label>
+                    <textarea name="deskripsi" class="form-control" placeholder="Jelaskan detail paket, fasilitas, dan keunggulan...">{{ old('deskripsi') }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ route('paket.index') }}" class="btn btn-secondary">Batal</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Simpan Paket
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const hidden = document.getElementById('jenis_kendaraan');
+    const opts = document.querySelectorAll('.toggle-option');
+    
+    function sync(){
+        opts.forEach(o => {
+            if(o.getAttribute('data-value') === hidden.value){ 
+                o.classList.add('active'); 
+            } else { 
+                o.classList.remove('active'); 
             }
-            opts.forEach(o=> o.addEventListener('click',()=>{ hidden.value = o.getAttribute('data-value'); sync(); }));
-            sync();
-        })();
-    </script>
+        });
+    }
+    
+    opts.forEach(o => o.addEventListener('click', () => { 
+        hidden.value = o.getAttribute('data-value'); 
+        sync(); 
+    }));
+    
+    sync();
+</script>
 @endsection
