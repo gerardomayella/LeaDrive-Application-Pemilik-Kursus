@@ -33,6 +33,7 @@ Route::post('/password/verify', [PasswordResetController::class, 'verifyAndReset
 
 // Dashboard (requires kursus session)
 Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
+Route::get('/dashboard/summary', [DashboardController::class, 'summary'])->name('dashboard.summary');
 
 // Paket Kursus
 Route::get('/paket', [PaketController::class, 'index'])->name('paket.index');

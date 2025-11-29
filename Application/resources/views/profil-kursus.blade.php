@@ -1,291 +1,557 @@
-@extends('layouts.base')
+@extends('layouts.base', ['title' => 'Profil Kursus - LeadDrive'])
 
 @push('styles')
-    <style>
-        #map {
-            height: 300px;
-            width: 100%;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            border: 1px solid #334155;
-        }
+<style>
+    :root {
+        --glass-bg: rgba(30, 37, 48, 0.5);
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        --primary-gradient: linear-gradient(135deg, #ff7f00 0%, #ff5500 100%);
+    }
 
-        .map-container {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
+    .page-container {
+        padding: 1.5rem;
+        min-height: calc(100vh - 70px);
+        background: radial-gradient(circle at top right, #1f1508 0%, #0f141a 60%);
+        font-family: 'Inter', sans-serif;
+    }
 
-        .map-search {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 1000;
-            width: calc(100% - 40px);
-            max-width: 400px;
-        }
+    /* Profile Header Card */
+    .profile-header-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2rem;
+        backdrop-filter: blur(12px);
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
 
-        .map-search input {
-            width: 100%;
-            padding: 10px 15px;
-            border-radius: 4px;
-            border: 1px solid #444;
-            background-color: #333;
-            color: #fff;
-            font-size: 14px;
-        }
+    .profile-header-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 300px;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 127, 0, 0.05));
+        pointer-events: none;
+    }
 
-        .location-coordinates {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
+    .header-avatar-section {
+        position: relative;
+        flex-shrink: 0;
+    }
 
-        .location-coordinates .form-group {
-            flex: 1;
-            margin-bottom: 0;
-        }
+    .header-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
 
-        .form-group input[readonly] {
-            background-color: #1f2937 !important;
-            color: #9ca3af !important;
-            cursor: not-allowed;
+    .header-avatar-btn {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 32px;
+        height: 32px;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        cursor: pointer;
+        border: 2px solid #1e2530;
+        transition: transform 0.2s;
+        font-size: 0.8rem;
+    }
+
+    .header-avatar-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .header-info {
+        flex: 1;
+    }
+
+    .header-name {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 0.25rem;
+        line-height: 1.2;
+    }
+
+    .header-role {
+        color: #ffb255;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .header-meta {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #94a3b8;
+        font-size: 0.9rem;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .meta-item i {
+        color: #cbd5e1;
+    }
+
+    /* Content Grid */
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .content-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 1.75rem;
+        backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-title i {
+        color: #ff7f00;
+        background: rgba(255, 127, 0, 0.1);
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+
+    /* Forms */
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+        display: block;
+        color: #cbd5e1;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        margin-left: 0.25rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(15, 20, 26, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: #fff;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        outline: none;
+    }
+
+    .form-control:focus {
+        border-color: #ff7f00;
+        background: rgba(15, 20, 26, 0.8);
+        box-shadow: 0 0 0 3px rgba(255, 127, 0, 0.1);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    /* Map */
+    .map-wrapper {
+        height: 250px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        margin-bottom: 1.25rem;
+    }
+
+    #map { width: 100%; height: 100%; }
+
+    .map-search {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        z-index: 5;
+    }
+
+    .map-search input {
+        width: 100%;
+        padding: 0.6rem 1rem 0.6rem 2.5rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(20, 25, 35, 0.95);
+        color: white;
+        font-size: 0.85rem;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .map-search i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 0.8rem;
+    }
+
+    /* Action Bar */
+    .action-bar {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-save {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 0.85rem 2.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1rem;
+        box-shadow: 0 4px 15px rgba(255, 127, 0, 0.2);
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 127, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .profile-header-card {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.5rem;
         }
-    </style>
+        .header-meta {
+            justify-content: center;
+        }
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 @endpush
 
 @section('content')
-<div class="container">
-    <h1 style="margin:0 0 16px 0;font-size:20px;font-weight:600;color:#e5e7eb">Profil Kursus</h1>
-
-    @if ($errors->any())
-        <div style="background:#432;color:#fca5a5;padding:12px 14px;border-radius:8px;margin-bottom:12px">
-            <ul style="margin:0;padding-left:16px">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    @if (session('success'))
-        <div style="background:#16321f;color:#86efac;padding:12px 14px;border-radius:8px;margin-bottom:12px">{{ session('success') }}</div>
-    @endif
-
-    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" style="display:grid;gap:14px;max-width:720px">
-        @csrf
-        @method('PUT')
-
-        <div style="display:flex;gap:16px;align-items:center">
-            <div>
-                @php $pf = $kursus->foto_profil ?? null; @endphp
-                <img src="{{ $pf ?: asset('images/logo.jpg') }}" alt="Foto Profil" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.2)">
+<div class="page-container">
+    <div class="container mx-auto">
+        
+        @if (session('success'))
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #34d399; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
+                <i class="fas fa-check-circle"></i> {{ session('success') }}
             </div>
-            <div style="flex:1">
-                <label for="foto_profil" style="display:block;margin-bottom:6px;color:#9ca3af">Foto Profil</label>
-                <input type="file" id="foto_profil" name="foto_profil" accept="image/*" style="width:100%;background:#0f172a;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:10px" />
-            </div>
-        </div>
+        @endif
 
-        <div>
-            <label for="nama_kursus" style="display:block;margin-bottom:6px;color:#9ca3af">Nama Kursus</label>
-            <input type="text" id="nama_kursus" name="nama_kursus" value="{{ old('nama_kursus', $kursus->nama_kursus) }}" required style="width:100%;background:#0f172a;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:10px" />
-        </div>
+        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
 
-        <div class="form-group">
-            <label for="lokasi" style="display:block;margin-bottom:6px;color:#9ca3af">Lokasi</label>
-            <div class="map-container">
-                <div class="map-search">
-                    <input type="text" id="search-box" placeholder="Cari lokasi...">
+            <!-- Header Card -->
+            <div class="profile-header-card">
+                <div class="header-avatar-section">
+                    @php $pf = $kursus->foto_profil ?? null; @endphp
+                    <img src="{{ $pf ?: asset('images/logo.jpg') }}" alt="Logo" class="header-avatar" id="avatar-preview">
+                    <label for="foto_profil" class="header-avatar-btn" title="Ganti Foto">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <input type="file" id="foto_profil" name="foto_profil" accept="image/*" style="display: none;" onchange="previewImage(this)">
                 </div>
-                <div id="map"></div>
-            </div>
-            <div class="location-coordinates">
-                <div class="form-group">
-                    <label for="latitude">Latitude <span style="color:#f87171">*</span></label>
-                    <input type="text" id="latitude" name="latitude" value="{{ old('latitude', $kursus->latitude) }}" required readonly style="width:100%;background:#0f172a;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:10px" />
-                </div>
-                <div class="form-group">
-                    <label for="longitude">Longitude <span style="color:#f87171">*</span></label>
-                    <input type="text" id="longitude" name="longitude" value="{{ old('longitude', $kursus->longitude) }}" required readonly style="width:100%;background:#0f172a;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:10px" />
+                <div class="header-info">
+                    <h1 class="header-name">{{ $kursus->nama_kursus }}</h1>
+                    <span class="header-role">Pemilik Kursus</span>
+                    <div class="header-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-envelope"></i> {{ $kursus->email }}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-phone"></i> {{ $kursus->telepon ?: 'Belum ada telepon' }}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i> {{ substr($kursus->jam_buka, 0, 5) }} - {{ substr($kursus->jam_tutup, 0, 5) }} WIB
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="lokasi">Alamat Lengkap <span style="color:#f87171">*</span></label>
-                <textarea id="lokasi" name="lokasi" required style="width:100%;background:#0f172a;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:10px;min-height:80px">{{ old('lokasi', $kursus->lokasi) }}</textarea>
+
+            <div class="content-grid">
+                <!-- Basic Info -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-info"></i> Informasi Dasar
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Nama Kursus</label>
+                        <input type="text" name="nama_kursus" class="form-control" value="{{ old('nama_kursus', $kursus->nama_kursus) }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nama Pemilik</label>
+                        <input type="text" name="nama_pemilik" class="form-control" value="{{ old('nama_pemilik', $kursus->nama_pemilik) }}">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ old('email', $kursus->email) }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Telepon</label>
+                            <input type="text" name="telepon" class="form-control" value="{{ old('telepon', $kursus->telepon) }}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Jam Buka</label>
+                            <input type="time" name="jam_buka" class="form-control" value="{{ old('jam_buka', $kursus->jam_buka) }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Jam Tutup</label>
+                            <input type="time" name="jam_tutup" class="form-control" value="{{ old('jam_tutup', $kursus->jam_tutup) }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-map-marker-alt"></i> Lokasi & Peta
+                        </div>
+                    </div>
+
+                    <div class="map-wrapper">
+                        <div class="map-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="search-box" placeholder="Cari lokasi...">
+                        </div>
+                        <div id="map-loading" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(30, 37, 48, 0.8); z-index: 2;">
+                            <div class="loading-spinner"></div>
+                        </div>
+                        <div id="map"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Alamat Lengkap</label>
+                        <textarea name="lokasi" class="form-control" rows="3" required placeholder="Masukkan alamat lengkap...">{{ old('lokasi', $kursus->lokasi) }}</textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Latitude</label>
+                            <input type="text" id="latitude" name="latitude" class="form-control" value="{{ old('latitude', $kursus->latitude) }}" readonly style="opacity: 0.7; cursor: default;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Longitude</label>
+                            <input type="text" id="longitude" name="longitude" class="form-control" value="{{ old('longitude', $kursus->longitude) }}" readonly style="opacity: 0.7; cursor: default;">
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div>
-                <label for="jam_buka" style="display:block;margin-bottom:6px;color:#9ca3af">Jam Buka</label>
-                <input type="text" id="jam_buka" name="jam_buka" value="{{ old('jam_buka', $kursus->jam_buka) }}" style="width:100%;background:#0f172a;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:10px" />
+            <div class="action-bar">
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save"></i> Simpan Perubahan
+                </button>
             </div>
-            <div>
-                <label for="jam_tutup" style="display:block;margin-bottom:6px;color:#9ca3af">Jam Tutup</label>
-                <input type="text" id="jam_tutup" name="jam_tutup" value="{{ old('jam_tutup', $kursus->jam_tutup) }}" style="width:100%;background:#0f172a;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:10px" />
-            </div>
-        </div>
 
-        <div>
-            <label for="nama_pemilik" style="display:block;margin-bottom:6px;color:#9ca3af">Nama Pemilik</label>
-            <input type="text" id="nama_pemilik" name="nama_pemilik" value="{{ old('nama_pemilik', $kursus->nama_pemilik) }}" style="width:100%;background:#0f172a;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:10px" />
-        </div>
-
-        <div>
-            <label for="email" style="display:block;margin-bottom:6px;color:#9ca3af">Email</label>
-            <input type="email" id="email" name="email" value="{{ old('email', $kursus->email) }}" required style="width:100%;background:#0f172a;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:10px" />
-        </div>
-
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
-            <a href="{{ route('dashboard') }}" style="background:#1f2937;color:#e5e7eb;border:1px solid #374151;border-radius:8px;padding:10px 14px;text-decoration:none">Batal</a>
-            <button type="submit" style="background:#2563eb;color:#fff;border:0;border-radius:8px;padding:10px 16px;cursor:pointer">Simpan Perubahan</button>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
+@endsection
 
 @push('scripts')
-    <script>
-        // Function to initialize the map
-        function initMap() {
-            // Check if Google Maps API is loaded
-            if (!window.google || !window.google.maps) {
-                console.error('Google Maps API not loaded');
-                return;
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatar-preview').src = e.target.result;
             }
-            
-            // Initialize map with current location or default to Jakarta
-            const initialLat = parseFloat('{{ old('latitude', $kursus->latitude) }}') || -6.2088;
-            const initialLng = parseFloat('{{ old('longitude', $kursus->longitude) }}') || 106.8456;
-            const initialZoom = '{{ $kursus->latitude && $kursus->longitude ? 15 : 12 }}';
-            
-            const map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: initialLat, lng: initialLng },
-                zoom: parseInt(initialZoom),
-                mapTypeId: 'roadmap',
-                styles: [
-                    {
-                        featureType: 'poi',
-                        elementType: 'labels',
-                        stylers: [{ visibility: 'off' }]
-                    }
-                ]
-            });
-
-            // Initialize search box
-            const input = document.getElementById('search-box');
-            const searchBox = new google.maps.places.SearchBox(input);
-            map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-
-            // Initialize marker with current position if available
-            let marker = new google.maps.Marker({
-                map: map,
-                draggable: true,
-                animation: google.maps.Animation.DROP,
-                position: { lat: initialLat, lng: initialLng },
-                title: 'Lokasi Kursus'
-            });
-
-            // Set initial values
-            if (!document.getElementById('latitude').value) {
-                document.getElementById('latitude').value = initialLat.toFixed(6);
-                document.getElementById('longitude').value = initialLng.toFixed(6);
-            }
-
-            // Function to update location fields
-            function updateLocationFields(location) {
-                const lat = location.lat();
-                const lng = location.lng();
-                
-                document.getElementById('latitude').value = lat.toFixed(6);
-                document.getElementById('longitude').value = lng.toFixed(6);
-                
-                // Update address using reverse geocoding
-                const geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-                    if (status === 'OK' && results[0]) {
-                        document.getElementById('lokasi').value = results[0].formatted_address;
-                    }
-                });
-                
-                // Center the map on the marker
-                map.panTo(location);
-            }
-
-            // Update form fields when marker is dragged
-            marker.addListener('dragend', function() {
-                updateLocationFields(marker.getPosition());
-            });
-
-            // Update marker position when a place is selected from search
-            searchBox.addListener('places_changed', function() {
-                const places = searchBox.getPlaces();
-
-                if (places.length === 0) {
-                    return;
-                }
-
-                // Get the first place from the search results
-                const place = places[0];
-
-                if (!place.geometry || !place.geometry.location) {
-                    console.log("Returned place contains no geometry");
-                    return;
-                }
-
-                // Move the marker to the selected location
-                marker.setPosition(place.geometry.location);
-                updateLocationFields(place.geometry.location);
-
-                // Center the map on the selected location
-                if (place.geometry.viewport) {
-                    map.fitBounds(place.geometry.viewport);
-                } else {
-                    map.setCenter(place.geometry.location);
-                    map.setZoom(17);
-                }
-            });
-
-            // Add click event to place marker
-            map.addListener('click', function(event) {
-                marker.setPosition(event.latLng);
-                updateLocationFields(event.latLng);
-            });
-
-            // Try to get user's current location if no coordinates are set
-            if (!'{{ $kursus->latitude }}' && !'{{ $kursus->longitude }}' && navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const pos = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        marker.setPosition(pos);
-                        map.setCenter(pos);
-                        map.setZoom(15);
-                        updateLocationFields(marker.getPosition());
-                    },
-                    () => {
-                        // Handle location access denied
-                        console.log('Geolocation access denied');
-                    }
-                );
-            }
+            reader.readAsDataURL(input.files[0]);
         }
+    }
 
-        // Load the Google Maps API script
-        function loadGoogleMaps() {
-            const script = document.createElement('script');
-            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyA51CWc7oYPE4uj4r6UsNaWOKutp_e85hY&libraries=places&callback=initMap';
-            script.async = true;
-            script.defer = true;
-            document.head.appendChild(script);
-        }
-
-        // Initialize when the DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            loadGoogleMaps();
+    // Make initMap globally accessible
+    window.initMap = function() {
+        if (!document.getElementById('map')) return;
+        
+        const initialLat = parseFloat('{{ old('latitude', $kursus->latitude) }}') || -6.2088;
+        const initialLng = parseFloat('{{ old('longitude', $kursus->longitude) }}') || 106.8456;
+        const initialZoom = {{ $kursus->latitude && $kursus->longitude ? 15 : 12 }};
+        
+        const map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: initialLat, lng: initialLng },
+            zoom: initialZoom,
+            mapTypeId: 'roadmap',
+            disableDefaultUI: true,
+            zoomControl: true,
+            styles: [
+                { "elementType": "geometry", "stylers": [{ "color": "#242f3e" }] },
+                { "elementType": "labels.text.stroke", "stylers": [{ "color": "#242f3e" }] },
+                { "elementType": "labels.text.fill", "stylers": [{ "color": "#746855" }] },
+                { "featureType": "road", "elementType": "geometry", "stylers": [{ "color": "#38414e" }] },
+                { "featureType": "road", "elementType": "geometry.stroke", "stylers": [{ "color": "#212a37" }] },
+                { "featureType": "road", "elementType": "labels.text.fill", "stylers": [{ "color": "#9ca5b3" }] },
+                { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#17263c" }] }
+            ]
         });
-    </script>
-@endpush
 
-@endsection
+        // Hide loading spinner when map is idle (loaded)
+        google.maps.event.addListenerOnce(map, 'idle', function() {
+            const loader = document.getElementById('map-loading');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 300);
+            }
+        });
+
+        const input = document.getElementById('search-box');
+        const searchBox = new google.maps.places.SearchBox(input);
+
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener("bounds_changed", () => {
+            searchBox.setBounds(map.getBounds());
+        });
+
+        let marker = new google.maps.Marker({
+            map: map,
+            draggable: true,
+            animation: google.maps.Animation.DROP,
+            position: { lat: initialLat, lng: initialLng }
+        });
+
+        // Initialize hidden fields if empty
+        if (!document.getElementById('latitude').value) {
+            document.getElementById('latitude').value = initialLat.toFixed(6);
+            document.getElementById('longitude').value = initialLng.toFixed(6);
+        }
+
+        function updateLocationFields(location) {
+            document.getElementById('latitude').value = location.lat().toFixed(6);
+            document.getElementById('longitude').value = location.lng().toFixed(6);
+            
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ location: location }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    document.querySelector('textarea[name="lokasi"]').value = results[0].formatted_address;
+                }
+            });
+        }
+
+        marker.addListener('dragend', function() { updateLocationFields(marker.getPosition()); });
+
+        searchBox.addListener('places_changed', function() {
+            const places = searchBox.getPlaces();
+            if (places.length === 0) return;
+            const place = places[0];
+            if (!place.geometry || !place.geometry.location) return;
+
+            marker.setPosition(place.geometry.location);
+            updateLocationFields(place.geometry.location);
+
+            if (place.geometry.viewport) map.fitBounds(place.geometry.viewport);
+            else {
+                map.setCenter(place.geometry.location);
+                map.setZoom(17);
+            }
+        });
+
+        map.addListener('click', function(event) {
+            marker.setPosition(event.latLng);
+            updateLocationFields(event.latLng);
+        });
+    }
+
+    function loadGoogleMaps() {
+        // Check if script is already loaded
+        if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+            if (window.google && window.google.maps) {
+                initMap();
+            }
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyA51CWc7oYPE4uj4r6UsNaWOKutp_e85hY&libraries=places&callback=initMap';
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGoogleMaps);
+    } else {
+        loadGoogleMaps();
+    }
+</script>
+@endpush

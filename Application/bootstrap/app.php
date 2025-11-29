@@ -37,7 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
             // Database connectivity/traffic
             if (!$message && $e instanceof QueryException) {
-                $message = 'Server database sedang sibuk atau tidak dapat diakses. Silakan coba lagi beberapa saat.';
+                $message = 'Server database sedang sibuk atau tidak dapat diakses. Error: ' . $e->getMessage();
                 $status = 503;
             }
 

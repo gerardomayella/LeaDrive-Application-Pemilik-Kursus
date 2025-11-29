@@ -115,8 +115,12 @@ class AuthController extends Controller
             $kursus->save();
         }
 
-        // Simpan session sederhana untuk menandai login kursus
-        $request->session()->put('kursus_id', $kursus->id_kursus);
+        // Simpan data kursus di session untuk kebutuhan UI
+        $request->session()->put([
+            'kursus_id' => $kursus->id_kursus,
+            'kursus_nama' => $kursus->nama_kursus ?? 'Pemilik Kursus',
+            'kursus_foto' => $kursus->foto_profil,
+        ]);
         $request->session()->regenerate();
 
         return redirect()->intended('/dashboard');
@@ -127,7 +131,7 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->session()->forget('kursus_id');
+        $request->session()->forget(['kursus_id', 'kursus_nama', 'kursus_foto']);
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/');
