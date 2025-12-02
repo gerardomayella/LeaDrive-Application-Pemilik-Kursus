@@ -39,21 +39,10 @@ class PasswordResetController extends Controller
         ], now()->addMinutes(10));
 
         try {
-            $emailObj = (new MailtrapEmail())
-                ->from(new Address('hello@demomailtrap.co', 'LeaDrive'))
-                ->to(new Address($email))
-                ->subject('Kode OTP Reset Password')
-                ->category('Password Reset')
-                ->text("Kode OTP Anda adalah: {$code}");
-
-            $response = MailtrapClient::initSendingEmails(
-                apiKey: '91371192f3243005143421361cf66841'
-            )->send($emailObj);
-
-
+            \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\PasswordResetOtp($code));
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Mailtrap Error: ' . $e->getMessage());
-            return back()->withErrors(['email' => 'Gagal mengirim email OTP. Silakan coba lagi nanti.'])->withInput();
+            \Illuminate\Support\Facades\Log::error('Mail Error: ' . $e->getMessage());
+            return back()->withErrors(['email' => 'Error: ' . $e->getMessage()])->withInput();
         }
 
         return redirect()->route('password.verify.show')->with([
@@ -69,12 +58,11 @@ class PasswordResetController extends Controller
         ]);
     }
 
-    public function verifyAndReset(Request $request)
+    public function verifyOtp(Request $request)
     {
         $validated = $request->validate([
             'email' => 'required|email',
             'otp' => 'required|digits:6',
-            'password' => 'required|string|min:8|confirmed',
         ]);
 
         $email = $validated['email'];
@@ -102,16 +90,46 @@ class PasswordResetController extends Controller
             return back()->withErrors(['otp' => 'OTP salah.'])->withInput();
         }
 
+        // OTP Valid, store in session to allow password reset
+        session([
+            'otp_verified_email' => $email,
+            'otp_verified_code' => $otpInput // Optional, just to double check
+        ]);
+
+        return redirect()->route('password.reset.show');
+    }
+
+    public function showResetForm()
+    {
+        if (!session('otp_verified_email')) {
+            return redirect()->route('password.verify.show')->withErrors(['email' => 'Silakan verifikasi OTP terlebih dahulu.']);
+        }
+
+        return view('password-reset');
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $email = session('otp_verified_email');
+        if (!$email) {
+            return redirect()->route('password.verify.show')->withErrors(['email' => 'Sesi habis. Silakan verifikasi ulang.']);
+        }
+
         $kursus = Kursus::where('email', $email)->first();
         if (!$kursus) {
-            Cache::forget('otp:'.$email);
-            return back()->withErrors(['email' => 'Email tidak terdaftar.']);
+            return redirect()->route('password.forgot.show')->withErrors(['email' => 'Email tidak terdaftar.']);
         }
 
         $kursus->password = Hash::make($validated['password']);
         $kursus->save();
 
+        // Clear OTP and Session
         Cache::forget('otp:'.$email);
+        session()->forget(['otp_verified_email', 'otp_verified_code', 'email_prefill']);
 
         return redirect()->route('login')->with('success', 'Password berhasil direset. Silakan login.');
     }

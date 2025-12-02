@@ -29,7 +29,9 @@ Route::get('/register/back/{step}', [RegistrationController::class, 'back'])->na
 Route::get('/password/forgot', [PasswordResetController::class, 'showForgot'])->name('password.forgot.show');
 Route::post('/password/forgot', [PasswordResetController::class, 'sendOtp'])->name('password.forgot.send');
 Route::get('/password/verify', [PasswordResetController::class, 'showVerify'])->name('password.verify.show');
-Route::post('/password/verify', [PasswordResetController::class, 'verifyAndReset'])->name('password.verify.reset');
+Route::post('/password/verify', [PasswordResetController::class, 'verifyOtp'])->name('password.verify.otp');
+Route::get('/password/reset', [PasswordResetController::class, 'showResetForm'])->name('password.reset.show');
+Route::post('/password/reset', [PasswordResetController::class, 'resetPassword'])->name('password.reset.submit');
 
 // Dashboard (requires kursus session)
 Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');

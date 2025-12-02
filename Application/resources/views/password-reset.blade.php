@@ -1,4 +1,4 @@
-@extends('layouts.base', ['title' => 'Verifikasi OTP', 'hideTopbar' => true])
+@extends('layouts.base', ['title' => 'Reset Password', 'hideTopbar' => true])
 
 @push('styles')
     <style>
@@ -152,15 +152,9 @@
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
-                <h1 class="auth-title">Verifikasi OTP</h1>
-                <p class="auth-subtitle">Masukkan kode OTP yang dikirim ke email Anda.</p>
+                <h1 class="auth-title">Reset Password</h1>
+                <p class="auth-subtitle">Masukkan password baru untuk akun Anda.</p>
             </div>
-
-            @if(session('success'))
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> {{ session('success') }}
-                </div>
-            @endif
 
             @if ($errors->any())
                 <div class="alert alert-error">
@@ -172,25 +166,27 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('password.verify.otp') }}">
+            <form method="POST" action="{{ route('password.reset.submit') }}">
                 @csrf
+                <input type="hidden" name="email" value="{{ session('otp_verified_email') }}">
+                <input type="hidden" name="otp" value="{{ session('otp_verified_code') }}">
+
                 <div class="form-group">
-                    <label for="email" class="form-label">Email Kursus</label>
-                    <input type="email" id="email" name="email" value="{{ old('email', $email ?? '') }}" required class="form-control" placeholder="nama@email.com">
+                    <label for="password" class="form-label">Password Baru</label>
+                    <input type="password" id="password" name="password" required class="form-control" placeholder="••••••••">
                 </div>
 
                 <div class="form-group">
-                    <label for="otp" class="form-label">Kode OTP</label>
-                    <input type="text" id="otp" name="otp" value="{{ old('otp') }}" required maxlength="6" class="form-control" placeholder="123456" style="letter-spacing: 2px; font-weight: 600;">
+                    <label for="password_confirmation" class="form-label">Konfirmasi Password Baru</label>
+                    <input type="password" id="password_confirmation" name="password_confirmation" required class="form-control" placeholder="••••••••">
                 </div>
 
                 <button type="submit" class="btn-primary">
-                    <i class="fas fa-check-circle"></i> Verifikasi OTP
+                    <i class="fas fa-save"></i> Simpan Password
                 </button>
             </form>
 
             <div class="auth-footer">
-                <p>Belum menerima kode? <a href="{{ route('password.forgot.show') }}" class="auth-link">Kirim ulang OTP</a></p>
                 <p>Kembali ke <a href="{{ route('login') }}" class="auth-link">Login</a></p>
             </div>
         </div>
