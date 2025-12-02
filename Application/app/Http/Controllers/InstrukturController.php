@@ -57,6 +57,9 @@ class InstrukturController extends Controller
             return redirect()->route('login');
         }
 
+        // Increase execution time limit to 5 minutes
+        set_time_limit(300);
+
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
@@ -107,7 +110,7 @@ class InstrukturController extends Controller
         } catch (\Throwable $e) {
             report($e);
             return back()->withErrors([
-                'general' => 'Server database sedang sibuk atau tidak dapat diakses. Silakan coba lagi beberapa saat.',
+                'general' => 'Error: ' . $e->getMessage(),
             ])->withInput();
         }
 
