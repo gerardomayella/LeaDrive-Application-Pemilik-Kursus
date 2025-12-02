@@ -50,4 +50,8 @@ return [
         'storage_url' => config('supabase.storage_url'),
     ],
 
+    'google_maps' => [
+        'key' => env('GOOGLE_MAPS_API_KEY'),
+    ],
+
 ];

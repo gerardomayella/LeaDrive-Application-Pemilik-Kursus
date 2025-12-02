@@ -454,7 +454,7 @@
             }
 
             const script = document.createElement('script');
-            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBxnRwN6RVUK9QxXl6gEEhzTd5k2EnzR5M&libraries=places&callback=initMap';
+            script.src = 'https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places&callback=initMap';
             script.async = true;
             script.defer = true;
             script.onerror = function() {
