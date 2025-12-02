@@ -30,7 +30,8 @@ class RegistrationSuccess extends Mailable
      */
     public function build()
     {
-        return $this->subject('Registrasi Berhasil - Menunggu Verifikasi Admin')
+        return $this->from('hello@demomailtrap.co')
+                    ->subject('Registrasi Berhasil - Menunggu Verifikasi Admin')
                     ->view('emails.registration_success');
     }
 }

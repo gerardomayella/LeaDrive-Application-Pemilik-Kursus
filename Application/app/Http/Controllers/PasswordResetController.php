@@ -50,11 +50,8 @@ class PasswordResetController extends Controller
                 apiKey: '91371192f3243005143421361cf66841'
             )->send($emailObj);
 
-            // Optional: Log response or handle specific errors if needed
-            // var_dump(ResponseHelper::toArray($response)); 
 
         } catch (\Throwable $e) {
-            // Log the error for debugging
             \Illuminate\Support\Facades\Log::error('Mailtrap Error: ' . $e->getMessage());
             return back()->withErrors(['email' => 'Gagal mengirim email OTP. Silakan coba lagi nanti.'])->withInput();
         }
