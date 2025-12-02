@@ -210,6 +210,15 @@
         border-bottom: none;
     }
 
+    /* First and Last Column Padding */
+    th:first-child, td:first-child {
+        padding-left: 2rem;
+    }
+
+    th:last-child, td:last-child {
+        padding-right: 2rem;
+    }
+
     tr:hover td {
         background: rgba(255, 255, 255, 0.02);
     }
@@ -321,6 +330,81 @@
         .stat-icon { width: 40px; height: 40px; font-size: 1rem; }
         .stat-value { font-size: 1.25rem; }
     }
+
+    /* Detail Row Styles */
+    .detail-row {
+        background: rgba(0, 0, 0, 0.2);
+    }
+    
+    .detail-panel {
+        padding: 1.5rem 2rem;
+        background: rgba(0, 0, 0, 0.1);
+        border-top: 1px solid var(--glass-border);
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 2rem;
+    }
+
+    .detail-section-title {
+        color: #ffb255;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .info-label {
+        color: #94a3b8;
+        font-size: 0.75rem;
+    }
+
+    .info-value {
+        color: #fff;
+        font-size: 0.9rem;
+        font-family: 'Monaco', 'Consolas', monospace;
+    }
+
+    .schedule-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+    }
+
+    .schedule-table th {
+        background: transparent;
+        padding: 0.5rem;
+        font-size: 0.75rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .schedule-table td {
+        background: rgba(255,255,255,0.03);
+        padding: 0.75rem;
+        border: none;
+        font-size: 0.85rem;
+    }
+
+    .schedule-table tr:first-child td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    .schedule-table tr:first-child td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
 </style>
 @endpush
 
@@ -409,25 +493,22 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="padding-left: 2rem;">Peserta</th>
-                            <th>Paket</th>
-                            <th>Pembayaran</th>
-                            <th>Status</th>
-                            <th>Progress</th>
-                            <th style="text-align: right; padding-right: 2rem;">Aksi</th>
+                            <th width="25%">Peserta</th>
+                            <th width="25%">Paket</th>
+                            <th width="20%">Pembayaran</th>
+                            <th width="20%">Status</th>
+                            <th width="10%" style="text-align: right;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($orders as $ord)
                             @php
-                                $jadwalTotal = $ord->jadwal->count();
-                                $jadwalSelesai = $ord->jadwal->where('status', 'selesai')->count();
-                                $progress = $jadwalTotal > 0 ? intval(($jadwalSelesai / $jadwalTotal) * 100) : 0;
+
                                 $bayarStatus = $ord->latestPembayaran?->status === 'sudah membayar' ? 'sudah membayar' : 'belum membayar';
                                 $statusKursus = strtolower($ord->status_pemesanan ?? 'pending');
                             @endphp
                             <tr>
-                                <td style="padding-left: 2rem;">
+                                <td>
                                     <div class="user-info">
                                         <div class="user-name">{{ $ord->user->name ?? 'Peserta' }}</div>
                                         <div class="user-meta">{{ \Carbon\Carbon::parse($ord->tanggal_pemesanan)->format('d M Y') }}</div>
@@ -455,26 +536,87 @@
                                         <span class="badge badge-warning">Pending</span>
                                     @endif
                                 </td>
-                                <td>
-                                    <div class="progress-container">
-                                        <div class="progress-labels">
-                                            <span>{{ $progress }}%</span>
-                                            <span>{{ $jadwalSelesai }}/{{ $jadwalTotal }}</span>
-                                        </div>
-                                        <div class="progress-track">
-                                            <div class="progress-bar" style="width: {{ $progress }}%;"></div>
+
+                                <td style="text-align: right;">
+                                    <button type="button" class="btn-icon" onclick="toggleDetail('{{ $ord->id_pemesanan }}')" id="btn-{{ $ord->id_pemesanan }}">
+                                        <i class="fas fa-chevron-right transition-transform duration-200"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <!-- Detail Row -->
+                            <tr id="detail-{{ $ord->id_pemesanan }}" class="detail-row" style="display: none;">
+                                <td colspan="5" style="padding: 0;">
+                                    <div class="detail-panel">
+                                        <div class="detail-grid">
+                                            <!-- Order Info -->
+                                            <div>
+                                                <div class="detail-section-title">
+                                                    <i class="fas fa-info-circle"></i> Informasi Pesanan
+                                                </div>
+                                                <div class="info-list">
+                                                    <div class="info-item">
+                                                        <span class="info-label">ID Pemesanan</span>
+                                                        <span class="info-value">#{{ $ord->id_pemesanan }}</span>
+                                                    </div>
+                                                    <div class="info-item">
+                                                        <span class="info-label">Tanggal Pemesanan</span>
+                                                        <span class="info-value">{{ \Carbon\Carbon::parse($ord->tanggal_pemesanan)->format('d F Y') }}</span>
+                                                    </div>
+                                                    <div class="info-item">
+                                                        <span class="info-label">Lokasi (Lat, Long)</span>
+                                                        <span class="info-value">
+                                                            {{ $ord->latitude ?? '-' }}, {{ $ord->longitude ?? '-' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Schedule -->
+                                            <div>
+                                                <div class="detail-section-title">
+                                                    <i class="fas fa-calendar-alt"></i> Jadwal Kursus
+                                                </div>
+                                                @if($ord->jadwal->count() > 0)
+                                                    <table class="schedule-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Tanggal</th>
+                                                                <th>Jam Mulai</th>
+                                                                <th>Instruktur</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach($ord->jadwal as $jadwal)
+                                                                <tr>
+                                                                    <td>{{ \Carbon\Carbon::parse($jadwal->tanggal)->format('d M Y') }}</td>
+                                                                    <td>{{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }}</td>
+                                                                    <td>
+                                                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                                            @if($jadwal->instruktur && $jadwal->instruktur->foto_profil)
+                                                                                <img src="{{ $jadwal->instruktur->foto_profil }}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                                                                            @else
+                                                                                <div style="width: 24px; height: 24px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 0.6rem;">
+                                                                                    <i class="fas fa-user"></i>
+                                                                                </div>
+                                                                            @endif
+                                                                            {{ $jadwal->instruktur->nama ?? '-' }}
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                @else
+                                                    <div style="color: #94a3b8; font-style: italic; font-size: 0.9rem;">Belum ada jadwal yang diatur.</div>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
-                                </td>
-                                <td style="text-align: right; padding-right: 2rem;">
-                                    <a href="#" class="btn-icon" title="Lihat Detail">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" style="text-align: center; padding: 4rem;">
+                                <td colspan="5" style="text-align: center; padding: 4rem;">
                                     <div style="color: #94a3b8; font-size: 0.95rem;">
                                         <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; opacity: 0.5;"></i>
                                         Belum ada data pesanan
@@ -492,4 +634,24 @@
         </div>
     </div>
 </div>
+
+<script>
+    function toggleDetail(id) {
+        const row = document.getElementById('detail-' + id);
+        const btn = document.getElementById('btn-' + id);
+        const icon = btn.querySelector('i');
+        
+        if (row.style.display === 'none') {
+            row.style.display = 'table-row';
+            icon.style.transform = 'rotate(90deg)';
+            btn.style.background = 'rgba(255, 255, 255, 0.1)';
+            btn.style.color = '#fff';
+        } else {
+            row.style.display = 'none';
+            icon.style.transform = 'rotate(0deg)';
+            btn.style.background = '';
+            btn.style.color = '';
+        }
+    }
+</script>
 @endsection

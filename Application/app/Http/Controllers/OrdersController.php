@@ -19,7 +19,8 @@ class OrdersController extends Controller
             'user',
             'paket',
             'latestPembayaran',
-            'jadwal',
+            'latestPembayaran',
+            'jadwal.instruktur',
         ]);
 
         if ($statusPesanan) {

@@ -174,7 +174,7 @@ class InstrukturController extends Controller
         } catch (\Throwable $e) {
             report($e);
             return back()->withErrors([
-                'general' => 'Server database sedang sibuk atau tidak dapat diakses. Silakan coba lagi beberapa saat.',
+                'general' => 'Error: ' . $e->getMessage(),
             ])->withInput();
         }
         return redirect()->route('instruktur.index')->with('success', 'Instruktur berhasil diperbarui');

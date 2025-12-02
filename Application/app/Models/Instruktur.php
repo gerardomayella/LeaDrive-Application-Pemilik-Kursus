@@ -35,4 +35,8 @@ class Instruktur extends Model
 
     // Jika tabel kamu tidak punya kolom created_at dan updated_at
     public $timestamps = false;
+
+    protected $casts = [
+        'status_aktif' => 'boolean',
+    ];
 }

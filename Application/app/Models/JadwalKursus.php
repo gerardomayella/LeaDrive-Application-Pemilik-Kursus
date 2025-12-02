@@ -19,10 +19,16 @@ class JadwalKursus extends Model
         'jam_mulai',
         'jam_selesai',
         'status',
+        'id_instruktur',
     ];
 
     public function pemesanan()
     {
         return $this->belongsTo(Pemesanan::class, 'id_pemesanan', 'id_pemesanan');
+    }
+
+    public function instruktur()
+    {
+        return $this->belongsTo(Instruktur::class, 'id_instruktur', 'id_instruktur');
     }
 }
