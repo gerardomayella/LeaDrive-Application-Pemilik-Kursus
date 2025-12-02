@@ -14,6 +14,8 @@ use Illuminate\Http\Client\ConnectionException as HttpConnectionException;
 use Illuminate\Http\Client\RequestException as HttpRequestException;
 use Illuminate\Database\QueryException;
 use PDOException;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RegistrationSuccess;
 
 class RegistrationController extends Controller
 {
@@ -51,7 +53,24 @@ class RegistrationController extends Controller
             'password_confirmation' => 'required|string|same:password',
             'terms' => 'accepted',
         ], [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'name.string' => 'Nama lengkap harus berupa teks.',
+            'name.max' => 'Nama lengkap maksimal 255 karakter.',
+            'email.required' => 'Email wajib diisi.',
+            'email.string' => 'Email harus berupa teks.',
+            'email.email' => 'Format email tidak valid.',
+            'email.max' => 'Email maksimal 255 karakter.',
+            'email.unique' => 'Email sudah terdaftar.',
+            'nomor_hp.required' => 'Nomor HP wajib diisi.',
+            'nomor_hp.regex' => 'Format nomor HP tidak valid (hanya angka, 8-20 digit).',
+            'nomor_hp.unique' => 'Nomor HP sudah terdaftar.',
+            'password.required' => 'Password wajib diisi.',
+            'password.string' => 'Password harus berupa teks.',
+            'password.min' => 'Password minimal 8 karakter.',
             'password.regex' => 'Password harus mengandung huruf besar, huruf kecil, dan angka.',
+            'password_confirmation.required' => 'Konfirmasi password wajib diisi.',
+            'password_confirmation.string' => 'Konfirmasi password harus berupa teks.',
+            'password_confirmation.same' => 'Konfirmasi password tidak cocok.',
             'terms.accepted' => 'Anda harus menyetujui syarat & ketentuan.',
         ]);
 
@@ -92,13 +111,22 @@ class RegistrationController extends Controller
             'jam_buka' => 'required|date_format:H:i',
             'jam_tutup' => 'required|date_format:H:i|after:jam_buka',
         ], [
-            'jam_tutup.after' => 'Jam tutup harus setelah jam buka.',
+            'nama_kursus.required' => 'Nama kursus wajib diisi.',
+            'nama_kursus.string' => 'Nama kursus harus berupa teks.',
+            'nama_kursus.max' => 'Nama kursus maksimal 255 karakter.',
+            'lokasi.required' => 'Lokasi wajib diisi.',
+            'lokasi.string' => 'Lokasi harus berupa teks.',
             'latitude.required' => 'Silakan pilih lokasi di peta.',
             'longitude.required' => 'Silakan pilih lokasi di peta.',
             'latitude.numeric' => 'Koordinat lokasi tidak valid.',
             'longitude.numeric' => 'Koordinat lokasi tidak valid.',
             'latitude.between' => 'Koordinat lintang harus antara -90 dan 90 derajat.',
-            'longitude.between' => 'Koordinat bujur harus antara -180 dan 180 derajat.'
+            'longitude.between' => 'Koordinat bujur harus antara -180 dan 180 derajat.',
+            'jam_buka.required' => 'Jam buka wajib diisi.',
+            'jam_buka.date_format' => 'Format jam buka tidak valid.',
+            'jam_tutup.required' => 'Jam tutup wajib diisi.',
+            'jam_tutup.date_format' => 'Format jam tutup tidak valid.',
+            'jam_tutup.after' => 'Jam tutup harus setelah jam buka.',
         ]);
 
         // Store step 2 data in session
@@ -143,10 +171,18 @@ class RegistrationController extends Controller
             'dokumen_legal' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ], [
             'ktp.required' => 'KTP pemilik kursus wajib diupload.',
-            'izin_usaha.required' => 'Izin usaha/SIUP wajib diupload.',
+            'ktp.file' => 'KTP harus berupa file.',
+            'ktp.mimes' => 'Format KTP harus berupa: jpg, jpeg, png, pdf.',
             'ktp.max' => 'File KTP maksimal 5MB.',
+            'izin_usaha.required' => 'Izin usaha/SIUP wajib diupload.',
+            'izin_usaha.file' => 'Izin usaha harus berupa file.',
+            'izin_usaha.mimes' => 'Format Izin Usaha harus berupa: jpg, jpeg, png, pdf.',
             'izin_usaha.max' => 'File Izin Usaha maksimal 5MB.',
+            'sertif_instruktur.file' => 'Sertifikat Instruktur harus berupa file.',
+            'sertif_instruktur.mimes' => 'Format Sertifikat Instruktur harus berupa: jpg, jpeg, png, pdf.',
             'sertif_instruktur.max' => 'File Sertifikat Instruktur maksimal 5MB.',
+            'dokumen_legal.file' => 'Dokumen Legal harus berupa file.',
+            'dokumen_legal.mimes' => 'Format Dokumen Legal harus berupa: jpg, jpeg, png, pdf.',
             'dokumen_legal.max' => 'File Dokumen Legal maksimal 5MB.',
         ]);
 
@@ -264,10 +300,18 @@ class RegistrationController extends Controller
 
             DB::commit();
 
+            // Send success email
+            try {
+                Mail::to($step1['email'])->send(new RegistrationSuccess($step1['name']));
+            } catch (\Exception $e) {
+                // Log error but don't fail the registration
+                \Log::error('Failed to send registration success email: ' . $e->getMessage());
+            }
+
             // Clear registration session
             $request->session()->forget('registration');
 
-            return redirect()->route('login')->with('success', 'Registrasi berhasil! Akun Anda sedang menunggu persetujuan admin.');
+            return redirect()->route('login')->with('success', 'Kursus sudah terkirim untuk Verifikasi oleh Admin, tunggu sekitar 24 jam setelah anda mengirimkan pengajuan Kursus.');
 
         } catch (\Exception $e) {
             if (isset($txStarted) && $txStarted) {

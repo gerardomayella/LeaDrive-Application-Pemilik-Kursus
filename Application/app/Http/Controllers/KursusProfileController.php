@@ -32,6 +32,7 @@ class KursusProfileController extends Controller
             'nama_pemilik' => 'nullable|string|max:255',
             'email' => 'required|email',
             'foto_profil' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:2048',
+            'nomor_hp' => 'nullable|string|max:255',
         ], [
             'latitude.required' => 'Silakan pilih lokasi di peta.',
             'longitude.required' => 'Silakan pilih lokasi di peta.',
@@ -49,7 +50,8 @@ class KursusProfileController extends Controller
         $kursus->jam_tutup = $validated['jam_tutup'] ?? null;
         $kursus->nama_pemilik = $validated['nama_pemilik'] ?? null;
         $kursus->email = $validated['email'];
-
+        $kursus->nomor_hp = $validated['nomor_hp'] ?? null;
+        
         if ($request->hasFile('foto_profil')) {
             $supabase = new SupabaseService();
             $url = $supabase->uploadKursusDocument($request->file('foto_profil'), 'fotokursus');

@@ -330,7 +330,7 @@
                             <i class="fas fa-envelope"></i> {{ $kursus->email }}
                         </div>
                         <div class="meta-item">
-                            <i class="fas fa-phone"></i> {{ $kursus->telepon ?: 'Belum ada telepon' }}
+                            <i class="fas fa-phone"></i> {{ $kursus->nomor_hp ?: 'Belum ada nomor HP' }}
                         </div>
                         <div class="meta-item">
                             <i class="fas fa-clock"></i> {{ substr($kursus->jam_buka, 0, 5) }} - {{ substr($kursus->jam_tutup, 0, 5) }} WIB
@@ -364,8 +364,8 @@
                             <input type="email" name="email" class="form-control" value="{{ old('email', $kursus->email) }}" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Telepon</label>
-                            <input type="text" name="telepon" class="form-control" value="{{ old('telepon', $kursus->telepon) }}">
+                            <label class="form-label">Nomor HP</label>
+                            <input type="text" name="nomor_hp" class="form-control" value="{{ old('nomor_hp', $kursus->nomor_hp) }}">
                         </div>
                     </div>
 
@@ -542,7 +542,7 @@
         }
 
         const script = document.createElement('script');
-        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyA51CWc7oYPE4uj4r6UsNaWOKutp_e85hY&libraries=places&callback=initMap';
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBxnRwN6RVUK9QxXl6gEEhzTd5k2EnzR5M&libraries=places&callback=initMap';
         script.async = true;
         script.defer = true;
         document.head.appendChild(script);

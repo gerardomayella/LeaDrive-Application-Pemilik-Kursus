@@ -22,8 +22,6 @@ class AuthController extends Controller
             // Tampilkan pesan error di halaman login
             $message = 'Koneksi ke Supabase Storage bermasalah: ' . ($health['error'] ?? 'unknown error');
             session()->flash('error', $message);
-        } else {
-            session()->flash('success', 'Terhubung ke Supabase Storage.');
         }
 
         $ok = isset($health['ok']) && $health['ok'] === true;

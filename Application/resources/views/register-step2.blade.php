@@ -272,207 +272,207 @@
 @endpush
 
 @push('scripts')
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA51CWc7oYPE4uj4r6UsNaWOKutp_e85hY&libraries=places&callback=Function.prototype" async defer></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize map
-            const map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: -6.2088, lng: 106.8456 }, // Default to Jakarta
-                zoom: 12,
-                styles: [
-                    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-                    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-                    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-                    {
-                        featureType: "administrative.locality",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#d59563" }],
-                    },
-                    {
-                        featureType: "poi",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#d59563" }],
-                    },
-                    {
-                        featureType: "poi.park",
-                        elementType: "geometry",
-                        stylers: [{ color: "#263c3f" }],
-                    },
-                    {
-                        featureType: "poi.park",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#6b9a76" }],
-                    },
-                    {
-                        featureType: "road",
-                        elementType: "geometry",
-                        stylers: [{ color: "#38414e" }],
-                    },
-                    {
-                        featureType: "road",
-                        elementType: "geometry.stroke",
-                        stylers: [{ color: "#212a37" }],
-                    },
-                    {
-                        featureType: "road",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#9ca5b3" }],
-                    },
-                    {
-                        featureType: "road.highway",
-                        elementType: "geometry",
-                        stylers: [{ color: "#746855" }],
-                    },
-                    {
-                        featureType: "road.highway",
-                        elementType: "geometry.stroke",
-                        stylers: [{ color: "#1f2835" }],
-                    },
-                    {
-                        featureType: "road.highway",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#f3d19c" }],
-                    },
-                    {
-                        featureType: "transit",
-                        elementType: "geometry",
-                        stylers: [{ color: "#2f3948" }],
-                    },
-                    {
-                        featureType: "transit.station",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#d59563" }],
-                    },
-                    {
-                        featureType: "water",
-                        elementType: "geometry",
-                        stylers: [{ color: "#17263c" }],
-                    },
-                    {
-                        featureType: "water",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#515c6d" }],
-                    },
-                    {
-                        featureType: "water",
-                        elementType: "labels.text.stroke",
-                        stylers: [{ color: "#17263c" }],
-                    },
-                ],
-            });
+        // Inisialisasi variabel global
+        let map;
+        let marker;
+        let searchBox;
 
-            // Initialize search box
-            const searchBox = new google.maps.places.SearchBox(document.getElementById('search-box'));
-            // map.controls[google.maps.ControlPosition.TOP_LEFT].push(document.getElementById('search-box'));
-
-            // Initialize marker
-            let marker = new google.maps.Marker({
-                map: map,
-                draggable: true,
-                animation: google.maps.Animation.DROP,
-                position: { lat: -6.2088, lng: 106.8456 }
-            });
-
-            // Update form fields when marker is dragged
-            marker.addListener('dragend', function() {
-                updateLocationFields(marker.getPosition());
-            });
-
-            // Update marker position when a place is selected from search
-            map.addListener('bounds_changed', function() {
-                searchBox.setBounds(map.getBounds());
-            });
-
-            // Listen for the event fired when the user selects a prediction and retrieve more details
-            searchBox.addListener('places_changed', function() {
-                const places = searchBox.getPlaces();
-
-                if (places.length === 0) {
+        // Fungsi inisialisasi peta
+        function initMap() {
+            try {
+                const mapElement = document.getElementById('map');
+                if (!mapElement) {
+                    console.error('Elemen dengan ID "map" tidak ditemukan');
                     return;
                 }
 
-                // Get the first place from the search results
-                const place = places[0];
-
-                if (!place.geometry || !place.geometry.location) {
-                    console.log("Returned place contains no geometry");
-                    return;
-                }
-
-                // Update the map and marker
-                if (place.geometry.viewport) {
-                    map.fitBounds(place.geometry.viewport);
-                } else {
-                    map.setCenter(place.geometry.location);
-                    map.setZoom(17);
-                }
-                
-                marker.setPosition(place.geometry.location);
-                updateLocationFields(place.geometry.location);
-                
-                // Update address field
-                document.getElementById('lokasi').value = place.formatted_address || '';
-            });
-
-            // Update location on map click
-            map.addListener('click', function(event) {
-                marker.setPosition(event.latLng);
-                updateLocationFields(event.latLng);
-                
-                // Reverse geocode to get address
-                const geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ location: event.latLng }, (results, status) => {
-                    if (status === 'OK' && results[0]) {
-                        document.getElementById('lokasi').value = results[0].formatted_address;
-                    }
+                // Inisialisasi peta
+                map = new google.maps.Map(mapElement, {
+                    center: { lat: -7.755131, lng: 110.421340 }, // Default to Yogyakarta
+                    zoom: 12,
+                    styles: [
+                        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+                        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+                        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+                        { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+                        { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+                        { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f" }] },
+                        { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
+                        { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+                        { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
+                        { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
+                        { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
+                        { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
+                        { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c" }] },
+                        { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
+                        { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+                        { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
+                        { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
+                        { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#17263c" }] },
+                    ],
                 });
-            });
 
-            // Update form fields with coordinates
-            function updateLocationFields(latLng) {
-                document.getElementById('latitude').value = latLng.lat();
-                document.getElementById('longitude').value = latLng.lng();
-                
-                // If address field is empty, try to get it from reverse geocoding
-                if (!document.getElementById('lokasi').value) {
+                // Inisialisasi marker
+                marker = new google.maps.Marker({
+                    map: map,
+                    draggable: true,
+                    animation: google.maps.Animation.DROP,
+                    position: { lat: -7.755131, lng: 110.421340 }
+                });
+
+                // Inisialisasi search box
+                const input = document.getElementById('search-box');
+                searchBox = new google.maps.places.SearchBox(input);
+
+                // Bias the SearchBox results towards current map's viewport.
+                map.addListener('bounds_changed', function() {
+                    searchBox.setBounds(map.getBounds());
+                });
+
+                // Update marker position when a place is selected from search
+                searchBox.addListener('places_changed', function() {
+                    const places = searchBox.getPlaces();
+
+                    if (places.length === 0) {
+                        return;
+                    }
+
+                    const place = places[0];
+                    if (!place.geometry || !place.geometry.location) {
+                        console.log("Tempat yang dipilih tidak memiliki geometri");
+                        return;
+                    }
+
+                    // Update marker position
+                    if (place.geometry.viewport) {
+                        map.fitBounds(place.geometry.viewport);
+                    } else {
+                        map.setCenter(place.geometry.location);
+                        map.setZoom(17);
+                    }
+
+                    marker.setPosition(place.geometry.location);
+                    updateLocationFields(place.geometry.location);
+                    
+                    // Update address field
+                    document.getElementById('lokasi').value = place.formatted_address || '';
+                });
+
+                // Update location on map click
+                map.addListener('click', function(event) {
+                    marker.setPosition(event.latLng);
+                    updateLocationFields(event.latLng);
+                    
+                    // Reverse geocode to get address
                     const geocoder = new google.maps.Geocoder();
-                    geocoder.geocode({ location: latLng }, (results, status) => {
+                    geocoder.geocode({ location: event.latLng }, (results, status) => {
                         if (status === 'OK' && results[0]) {
                             document.getElementById('lokasi').value = results[0].formatted_address;
                         }
                     });
+                });
+
+                // Update marker when dragged
+                marker.addListener('dragend', function() {
+                    updateLocationFields(marker.getPosition());
+                    
+                    // Reverse geocode to get address
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({ location: marker.getPosition() }, (results, status) => {
+                        if (status === 'OK' && results[0]) {
+                            document.getElementById('lokasi').value = results[0].formatted_address;
+                        }
+                    });
+                });
+
+                // Initialize with current location if available
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const pos = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                            };
+                            
+                            marker.setPosition(pos);
+                            map.setCenter(pos);
+                            map.setZoom(15);
+                            updateLocationFields(new google.maps.LatLng(pos.lat, pos.lng));
+                            
+                            // Get address from coordinates
+                            const geocoder = new google.maps.Geocoder();
+                            geocoder.geocode({ location: pos }, (results, status) => {
+                                if (status === 'OK' && results[0]) {
+                                    document.getElementById('lokasi').value = results[0].formatted_address;
+                                }
+                            });
+                        },
+                        () => {
+                            console.log('Geolocation access denied');
+                        }
+                    );
+                }
+
+                // Update form fields with initial position
+                updateLocationFields(marker.getPosition());
+
+            } catch (error) {
+                console.error('Error saat menginisialisasi peta:', error);
+                const mapElement = document.getElementById('map');
+                if (mapElement) {
+                    mapElement.innerHTML = '<div style="color: #ff6b6b; padding: 20px; text-align: center;">Terjadi kesalahan saat memuat peta. Silakan muat ulang halaman.</div>';
                 }
             }
-            
-            // Initialize with current location if available
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const pos = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        
-                        marker.setPosition(pos);
-                        map.setCenter(pos);
-                        map.setZoom(15);
-                        updateLocationFields(pos);
-                        
-                        // Get address from coordinates
-                        const geocoder = new google.maps.Geocoder();
-                        geocoder.geocode({ location: pos }, (results, status) => {
-                            if (status === 'OK' && results[0]) {
-                                document.getElementById('lokasi').value = results[0].formatted_address;
-                            }
-                        });
-                    },
-                    () => {
-                        // Handle location access denied
-                        console.log('Geolocation access denied');
-                    }
-                );
+        }
+
+        // Fungsi untuk memperbarui field latitude dan longitude
+        function updateLocationFields(position) {
+            if (position) {
+                const lat = typeof position.lat === 'function' ? position.lat() : position.lat;
+                const lng = typeof position.lng === 'function' ? position.lng() : position.lng;
+                
+                const latInput = document.getElementById('latitude');
+                const lngInput = document.getElementById('longitude');
+                
+                if (latInput) latInput.value = lat;
+                if (lngInput) lngInput.value = lng;
             }
-        });
+        }
+
+        // Fungsi untuk memuat Google Maps API
+        function loadGoogleMaps() {
+            // Cek apakah Google Maps API sudah dimuat
+            if (typeof google === 'object' && typeof google.maps === 'object') {
+                initMap();
+                return;
+            }
+
+            // Cek apakah script sudah ada di DOM
+            if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBxnRwN6RVUK9QxXl6gEEhzTd5k2EnzR5M&libraries=places&callback=initMap';
+            script.async = true;
+            script.defer = true;
+            script.onerror = function() {
+                console.error('Gagal memuat Google Maps API');
+                const mapContainer = document.getElementById('map');
+                if (mapContainer) {
+                    mapContainer.innerHTML = '<div style="color: #ff6b6b; padding: 20px; text-align: center;">Gagal memuat peta. Pastikan koneksi internet Anda stabil dan coba muat ulang halaman.</div>';
+                }
+            };
+            document.head.appendChild(script);
+        }
+
+        // Panggil fungsi loadGoogleMaps saat dokumen selesai dimuat
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadGoogleMaps);
+        } else {
+            loadGoogleMaps();
+        }
     </script>
 @endpush
 

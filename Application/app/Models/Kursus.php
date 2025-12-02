@@ -9,17 +9,13 @@ class Kursus extends Model
 {
     use HasFactory;
 
-    // Nama tabel sesuai di database Supabase
     protected $table = 'kursus';
 
-    // Primary key tabel
     protected $primaryKey = 'id_kursus';
 
-    // Karena id_kursus adalah bigint (int8)
     protected $keyType = 'int';
     public $incrementing = true;
 
-    // Kolom yang bisa diisi melalui mass assignment
     protected $fillable = [
         'nama_kursus',
         'lokasi',
@@ -32,9 +28,9 @@ class Kursus extends Model
         'password',
         'longitude',
         'latitude',
+        'nomor_hp',
     ];
 
-    // Menggunakan kolom created_at & updated_at sesuai schema
     public $timestamps = true;
 
     /**

@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Mail\OtpMail;
 use App\Models\Kursus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
+use Mailtrap\Helper\ResponseHelper;
+use Mailtrap\MailtrapClient;
+use Mailtrap\Mime\MailtrapEmail;
+use Symfony\Component\Mime\Address;
 
 class PasswordResetController extends Controller
 {
@@ -37,9 +39,24 @@ class PasswordResetController extends Controller
         ], now()->addMinutes(10));
 
         try {
-            Mail::to($email)->send(new OtpMail($code));
+            $emailObj = (new MailtrapEmail())
+                ->from(new Address('hello@demomailtrap.co', 'LeaDrive'))
+                ->to(new Address($email))
+                ->subject('Kode OTP Reset Password')
+                ->category('Password Reset')
+                ->text("Kode OTP Anda adalah: {$code}");
+
+            $response = MailtrapClient::initSendingEmails(
+                apiKey: '91371192f3243005143421361cf66841'
+            )->send($emailObj);
+
+            // Optional: Log response or handle specific errors if needed
+            // var_dump(ResponseHelper::toArray($response)); 
+
         } catch (\Throwable $e) {
-            return back()->withErrors(['email' => 'Gagal mengirim email OTP. Pastikan konfigurasi mail sudah benar.'])->withInput();
+            // Log the error for debugging
+            \Illuminate\Support\Facades\Log::error('Mailtrap Error: ' . $e->getMessage());
+            return back()->withErrors(['email' => 'Gagal mengirim email OTP. Silakan coba lagi nanti.'])->withInput();
         }
 
         return redirect()->route('password.verify.show')->with([
