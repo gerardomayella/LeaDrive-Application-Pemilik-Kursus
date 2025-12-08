@@ -38,7 +38,7 @@ Dibangun dengan teknologi modern **Laravel 12** dan **Tailwind CSS 4**, aplikasi
 -   **Backend**: Laravel 12 (PHP ^8.2)
 -   **Frontend**: Blade Templates, Tailwind CSS v4.0
 -   **Build Tool**: Vite
--   **Database**: MySQL
+-   **Database**: PostgreSQL (supabase cloud)
 -   **Layanan Pihak Ketiga**:
     -   Google Maps Platform (Maps JavaScript API)
     -   Mailtrap (Email Sandbox)
@@ -52,7 +52,7 @@ Sebelum memulai, pastikan sistem Anda telah terinstal:
 -   PHP >= 8.2
 -   Composer
 -   Node.js & npm
--   MySQL
+-   PostgreSQL
 
 ---
 
