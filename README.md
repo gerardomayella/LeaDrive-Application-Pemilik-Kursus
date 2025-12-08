@@ -6,6 +6,14 @@
 
 **Aplikasi Manajemen Kursus Mengemudi untuk Pemilik Kursus**
 
+
+## 👤 Penulis
+
+**Gerardo Mayella Ardianta**
+-   **NIM**: 235314003
+
+---
+
 ## 📖 Deskripsi
 
 **LeaDrive (Pemilik Kursus)** adalah platform berbasis web yang dirancang khusus untuk pemilik kursus mengemudi. Aplikasi ini memungkinkan pemilik untuk mengelola profil kursus, verifikasi data, memantau pesanan masuk, serta mengelola lokasi kursus menggunakan integrasi peta.
@@ -102,13 +110,6 @@ Ikuti langkah-langkah berikut untuk menjalankan aplikasi di lingkungan lokal:
     ```
 
 Akses aplikasi melalui browser di `http://127.0.0.1:8000`.
-
----
-
-## 👤 Penulis
-
-**Gerardo Mayella Ardianta**
--   **NIM**: 235314003
 
 ---
 
