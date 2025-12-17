@@ -311,7 +311,7 @@
             <div class="flex gap-4 items-center flex-wrap" style="flex: 1; justify-content: flex-end;">
                 <form method="GET" action="{{ route('mobil.index') }}" class="search-bar">
                     <i class="fas fa-search" style="color: #64748b; padding-top: 2px;"></i>
-                    <input class="search-input" type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari merk atau plat nomor...">
+                    <input class="search-input" type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari merk kendaraan...">
                 </form>
                 <a href="{{ route('mobil.create') }}" class="btn-add">
                     <i class="fas fa-plus"></i> Tambah Kendaraan
@@ -341,10 +341,7 @@
                     <div class="vehicle-details">
                         <h3 class="vehicle-name">{{ $m->merk }}</h3>
                         <div class="vehicle-meta">
-                            <div class="meta-item" title="Nomor Polisi">
-                                <i class="fas fa-id-card"></i> 
-                                <span>{{ $m->plat_nomor ?? 'B 1234 XYZ' }}</span>
-                            </div>
+
                             @if($m->stnk)
                             <div class="meta-item" title="Masa Berlaku STNK">
                                 <i class="fas fa-calendar-alt"></i> 
