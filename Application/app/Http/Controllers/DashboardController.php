@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Pemesanan;
 use App\Models\User;
 use App\Models\JadwalKursus;
+use App\Models\RatingUlasan;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -17,7 +18,6 @@ class DashboardController extends Controller
             return redirect()->route('login');
         }
 
-        // Return view immediately, data will be fetched via AJAX
         return view('dashboard', [
             'stats' => [],
             'recent_orders' => []
@@ -34,27 +34,28 @@ class DashboardController extends Controller
         $pesananHariIni = Pemesanan::whereHas('paket', function ($q) use ($kursusId) {
             $q->where('id_kursus', $kursusId);
         })
-            ->whereDate('tanggal_pemesanan', now())
+            ->whereDate('tanggal_pemesanan', '>=', now())
             ->count();
 
-        $totalPeserta = User::where('role', 'peserta')
-            ->whereHas('pemesanan.paket', function ($q) use ($kursusId) {
+        $totalPeserta = Pemesanan::whereHas('paket', function ($q) use ($kursusId) {
                 $q->where('id_kursus', $kursusId);
             })
-            ->distinct('id')
-            ->count();
+            ->distinct('id_user')
+            ->count('id_user');
 
         $jadwalAktif = JadwalKursus::whereHas('pemesanan.paket', function ($q) use ($kursusId) {
             $q->where('id_kursus', $kursusId);
         })
-            ->where('status', 'belum dimulai')
-            ->whereDate('tanggal', '>=', now())
+            ->whereDate('tanggal', now())
             ->count();
+            
+        $avgRating = RatingUlasan::where('id_kursus', $kursusId)->avg('rating') ?? 0;
 
         $recentOrders = Pemesanan::with(['user', 'paket', 'instruktur'])
             ->whereHas('paket', function ($q) use ($kursusId) {
                 $q->where('id_kursus', $kursusId);
             })
+            ->whereDate('tanggal_pemesanan', now())
             ->orderByDesc('id_pemesanan')
             ->limit(5)
             ->get()
@@ -64,7 +65,7 @@ class DashboardController extends Controller
                     'paket' => $order->paket->nama_paket ?? 'Paket Kursus',
                     'status' => $order->status_pemesanan,
                     'status_color' => $order->status_pemesanan === 'finish' ? '#10b981' : '#f59e0b',
-                    'time_ago' => Carbon::parse($order->created_at)->diffForHumans(),
+                    'time_ago' => 'Hari ini',
                 ];
             });
 
@@ -73,6 +74,7 @@ class DashboardController extends Controller
                 'pesanan_hari_ini' => $pesananHariIni,
                 'total_peserta' => $totalPeserta,
                 'jadwal_aktif' => $jadwalAktif,
+                'rating' => round($avgRating, 1),
             ],
             'recent_orders' => $recentOrders,
         ]);

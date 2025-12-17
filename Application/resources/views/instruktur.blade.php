@@ -357,10 +357,7 @@
                             <i class="fas fa-envelope"></i>
                             <span class="truncate">{{ $i->email }}</span>
                         </div>
-                        <div class="detail-item">
-                            <i class="fas fa-phone"></i>
-                            <span>{{ $i->no_telepon ?? '-' }}</span>
-                        </div>
+
                         <div class="detail-item">
                             <i class="fas fa-id-card"></i>
                             <span>SIM: {{ $i->nomor_sim ?? 'Belum ada' }}</span>

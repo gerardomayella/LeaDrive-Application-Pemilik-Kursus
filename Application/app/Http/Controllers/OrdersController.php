@@ -10,12 +10,19 @@ class OrdersController extends Controller
 {
     public function index(Request $request)
     {
+        $kursusId = $request->session()->get('kursus_id');
+        if (!$kursusId) {
+            return redirect()->route('login');
+        }
+
         $statusPesanan = $request->input('status_pesanan');
         $statusKursus = $request->input('status_kursus');
         $paketId = $request->input('paket');
         $q = $request->input('q');
 
-        $base = Pemesanan::with([
+        $base = Pemesanan::whereHas('paket', function ($query) use ($kursusId) {
+            $query->where('id_kursus', $kursusId);
+        })->with([
             'user',
             'paket',
             'latestPembayaran',
@@ -53,19 +60,26 @@ class OrdersController extends Controller
 
         $orders = $base->orderByDesc('id_pemesanan')->paginate(10)->withQueryString();
 
+        // Helper for counts to ensure we always filter by kursus_id
+        $countBase = function() use ($kursusId) {
+            return Pemesanan::whereHas('paket', function ($q) use ($kursusId) {
+                $q->where('id_kursus', $kursusId);
+            });
+        };
+
         $counts = [
-            'belum_membayar' => Pemesanan::doesntHave('latestPembayaran', 'and', function ($sq) {
+            'belum_membayar' => $countBase()->doesntHave('latestPembayaran', 'and', function ($sq) {
                 $sq->where('status', 'sudah membayar');
             })->count(),
-            'sudah_membayar' => Pemesanan::whereHas('latestPembayaran', function ($sq) {
+            'sudah_membayar' => $countBase()->whereHas('latestPembayaran', function ($sq) {
                 $sq->where('status', 'sudah membayar');
             })->count(),
-            'on_going' => Pemesanan::where('status_pemesanan', 'on going')->count(),
-            'finish' => Pemesanan::where('status_pemesanan', 'finish')->count(),
-            'total' => Pemesanan::count(),
+            'on_going' => $countBase()->where('status_pemesanan', 'on going')->count(),
+            'finish' => $countBase()->where('status_pemesanan', 'finish')->count(),
+            'total' => $countBase()->count(),
         ];
 
-        $pakets = PaketKursus::orderBy('nama_paket')->get();
+        $pakets = PaketKursus::where('id_kursus', $kursusId)->orderBy('nama_paket')->get();
 
         return view('pesanan', [
             'orders' => $orders,

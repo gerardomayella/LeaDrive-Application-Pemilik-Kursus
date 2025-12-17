@@ -378,7 +378,9 @@
                 </div>
                 <div class="stat-info">
                     <span class="stat-label">Rating Rata-rata</span>
-                    <span class="stat-value">4.8</span>
+                    <span class="stat-value" id="stat-rating">
+                        <div class="skeleton skeleton-value"></div>
+                    </span>
                 </div>
             </div>
         </div>
@@ -495,6 +497,7 @@
         setVal('stat-order-today', stats.pesanan_hari_ini);
         setVal('stat-total-peserta', stats.total_peserta);
         setVal('stat-jadwal-aktif', stats.jadwal_aktif);
+        setVal('stat-rating', stats.rating);
     }
 
     function updateRecentActivity(orders) {
